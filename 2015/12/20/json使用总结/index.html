@@ -1,100 +1,83 @@
-<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
-  <title><![CDATA[RRRay]]></title>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
   
-  <link href="/atom.xml" rel="self"/>
-  <link href="http://yoursite.com/"/>
-  <updated>2015-12-22T05:55:22.499Z</updated>
-  <id>http://yoursite.com/</id>
+  <title>json使用总结 | RRRay</title>
+  <meta name="viewport" content="width=device-width">
+  <meta name="description" content="写爬虫的时候真的发现json很好用，作为一种序列化机制。。。恐怕没有更好理解的了。
+这里我的数据经历了：
+网站–&amp;gt;python爬虫–&amp;gt;mysql数据库&amp;lt;–&amp;gt;php程序&amp;lt;–&amp;gt;java(安卓app)">
+<meta property="og:type" content="article">
+<meta property="og:title" content="json使用总结">
+<meta property="og:url" content="http://yoursite.com/2015/12/20/json使用总结/index.html">
+<meta property="og:site_name" content="RRRay">
+<meta property="og:description" content="写爬虫的时候真的发现json很好用，作为一种序列化机制。。。恐怕没有更好理解的了。
+这里我的数据经历了：
+网站–&amp;gt;python爬虫–&amp;gt;mysql数据库&amp;lt;–&amp;gt;php程序&amp;lt;–&amp;gt;java(安卓app)">
+<meta property="og:image" content="http://images.cnblogs.com/cnblogs_com/coser/201112/201112141621136287.png">
+<meta property="og:updated_time" content="2015-12-22T05:54:13.666Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="json使用总结">
+<meta name="twitter:description" content="写爬虫的时候真的发现json很好用，作为一种序列化机制。。。恐怕没有更好理解的了。
+这里我的数据经历了：
+网站–&amp;gt;python爬虫–&amp;gt;mysql数据库&amp;lt;–&amp;gt;php程序&amp;lt;–&amp;gt;java(安卓app)">
   
-  <author>
-    <name><![CDATA[RRRay]]></name>
-    <email><![CDATA[kknightgo@gmail.com]]></email>
-  </author>
+    <link rel="alternative" href="/atom.xml" title="RRRay" type="application/atom+xml">
   
-  <generator uri="http://hexo.io/">Hexo</generator>
   
-  <entry>
-    <title><![CDATA[learn pyspider]]></title>
-    <link href="http://yoursite.com/2015/12/20/learn-pyspider/"/>
-    <id>http://yoursite.com/2015/12/20/learn-pyspider/</id>
-    <published>2015-12-20T14:34:32.000Z</published>
-    <updated>2015-12-22T05:55:22.499Z</updated>
-    <content type="html"><![CDATA[<p>虽然知道当时实验室的活以及随之到来的各种考试已经占满了时间表，但是仅仅因为我自己很想做，还是接下来了。</p>
-<h1 id="u5FC3_u8DEF_u5386_u7A0B"><a href="#u5FC3_u8DEF_u5386_u7A0B" class="headerlink" title="心路历程"></a>心路历程</h1><p>大概了解了爬虫的情况之后，觉得还是用框架比较好。<br>当时的需求是：</p>
-<ol>
-<li>爬的数据量要比较大，当时他们甚至提出多买几台服务器的提议。</li>
-<li>需要的信息很多是实时刷新，这也是需要这个审核发布系统的原因，可是随时尽快的得到最新的爬虫数据。</li>
-<li>希望可以方便的添加爬虫，也便于这个部分给非技术人员的交接。</li>
-</ol>
-<a id="more"></a>
-<p>然后大概了解了当前的爬虫技术的情况，首先进入视野的当然是scrapy。确实，scrapy非常容易上手，几个组件的工作流程清晰。不过我当时马上遇到了要解析js请求的问题。对于不需要js渲染的网站，当时很快成功了，面对需要渲染的网站：主要办法</p>
-<ol>
-<li>手动模拟请求方式</li>
-<li>配合轻型浏览器作为中间件来渲染网页</li>
-</ol>
-<p>不过看过了某家网站的请求，发现似乎其request是加密的，每次js request是不一样的，因此觉得第一个办法打了折，并且关于渲染时间和人工分析时间的trade off，目前情况，我还是觉得后者比较昂贵。</p>
-<p>至于第二种办法，我找到了这个组件： <a href="http://blog.scrapinghub.com/2015/03/02/handling-javascript-in-scrapy-with-splash/" target="_blank" rel="external">Splash</a>,<a href="http://splash.readthedocs.org/en/stable/" target="_blank" rel="external">文档</a>，其实发现splash的定制化很高，但是文档也很长。没耐心看的时候有点头疼，中间我在调试的时候发现了另外一个爬虫框架：<a href="http://docs.pyspider.org/en/latest/Working-with-Results/" target="_blank" rel="external">pyspider</a>，这是它的描述：</p>
-  <blockquote><ul>
-<li>Write script in Python  </li>
-<li>Powerful WebUI with script editor, task monitor, project manager and result viewer  </li>
-<li>MySQL, MongoDB, Redis, SQLite, PostgreSQL with SQLAlchemy as database backend</li>
-<li>RabbitMQ, Beanstalk, Redis and Kombu as message queue</li>
-<li>Task priority, retry, periodical, recrawl by age, etc…</li>
-<li>Distributed architecture, Crawl Javascript pages, Python 2&amp;3, etc…</li>
-</ul>
-</blockquote>
-<p>完全符合需求，更重要的是，文档中也直接给出当时比较头疼的js渲染问题例子，感觉比较适合自己小白的身份。而且文档一点也不长，解释很清楚，所以立马上手试验，对了，关键是有web端控制台，简直就是小白的利器。考虑到当时最主要的解析js的问题，同样目钱的需求是能立刻使功能实现，另外phantomjs也允许做出进一步的渲染需求，所以马上就转手Pyspider了。</p>
-<p>以一个小白的身份感受比较深的是这几点好处：</p>
-<ol>
-<li>组件结构清晰，适应分布式的处理方式，因此也容易根据各个组建的状态分析问题。</li>
-<li>控制台友好，方便在其他终端查看服务器上的爬虫状态，更重要的是，在其他终端就可以很方便的进行调试。</li>
-<li>组件的配置非常灵活，可以适应不同的爬虫规模。</li>
-</ol>
-<p>特别是自己感受的前两点，<strong>非常方便找bug和分析问题</strong>，一直觉得调试方便时使用轮子的最重要的一点.<br>另外这个框架是北邮的一位同学写的，在group里是有问必答。感谢轮子主。。。还有比这一点更适合小白的吗<em>(:зゝ∠)</em></p>
-<h1 id="u5177_u4F53_u4F7F_u7528"><a href="#u5177_u4F53_u4F7F_u7528" class="headerlink" title="具体使用"></a>具体使用</h1><h2 id="u5B89_u88C5_u8FC7_u7A0B"><a href="#u5B89_u88C5_u8FC7_u7A0B" class="headerlink" title="安装过程"></a>安装过程</h2><p>除了官方文档，参考这位同学的<a href="https://imlonghao.com/9.html" target="_blank" rel="external">博文</a>，这位博主的<a href="https://imlonghao.com/10.html" target="_blank" rel="external">轻松组建分布式 pyspider 集群</a>也是很好的参考。</p>
-<h2 id="u4F7F_u7528"><a href="#u4F7F_u7528" class="headerlink" title="使用"></a>使用</h2><p>作者的文档比较清晰，这里有几处花时间较多的点：</p>
-<ol>
-<li><p>phamtomjs挂掉  </p>
-<p>crawl rate这里，作者提到了<a href="http://en.wikipedia.org/wiki/Token_bucket" target="_blank" rel="external">token_bucket</a>，之前有时候会遇到phantomjs挂掉的情况，实验过后发现应该适合crawl rate的设置有关。遇到phamtomjs挂掉的问题，我现在的解决办法是：</p>
-</li>
-</ol>
-<ul>
-<li>设置crawl rate变小，默认1/3,我会改成0.5/3，</li>
-<li>在不同的端口多开几个phantomjs的process和对应的 fetcher的process</li>
-</ul>
-<p>其实关于速率这个问题，我还没有仔细的研究过该怎么找到最好的适应不同爬虫规模的那个point，作者也提供了爬虫平均速率在Webui的展示，但是赶着完成其他部分。以后不同规模和环境的爬虫跑起来以后，可能这个问题还是需要搞清楚。</p>
-<ol>
-<li>重写result处理方法</li>
-</ol>
-<p>在框架中的result默认处理方式是将所有结构化信息打包成了一个jsonobject存储在了默认以project为名的表中。并且框架不提供关于进一步处理result的接口，这样的话，需要重写result处理这部分的程序。重写on_result方法（刚方法是处理前面爬虫组件传递的result的回调方法）。默认是project, taskid等此类task信息加上一个result jsonobject作为插入数据库的feild，这里，我需要把result json拆分成单独的field插入到指定的表中。重写的<a href="https://github.com/potatoker/pyspider-files" target="_blank" rel="external">my_result_worker</a>这个类将被作为参数指定执行result_worker组件。把这两个文件放到pyspider的根目录下即可。</p>
-]]></content>
-    <summary type="html">
-    <![CDATA[<p>虽然知道当时实验室的活以及随之到来的各种考试已经占满了时间表，但是仅仅因为我自己很想做，还是接下来了。</p>
-<h1 id="u5FC3_u8DEF_u5386_u7A0B"><a href="#u5FC3_u8DEF_u5386_u7A0B" class="headerlink" title="心路历程"></a>心路历程</h1><p>大概了解了爬虫的情况之后，觉得还是用框架比较好。<br>当时的需求是：</p>
-<ol>
-<li>爬的数据量要比较大，当时他们甚至提出多买几台服务器的提议。</li>
-<li>需要的信息很多是实时刷新，这也是需要这个审核发布系统的原因，可是随时尽快的得到最新的爬虫数据。</li>
-<li>希望可以方便的添加爬虫，也便于这个部分给非技术人员的交接。</li>
-</ol>]]>
-    
-    </summary>
-    
-      <category term="crawler" scheme="http://yoursite.com/tags/crawler/"/>
-    
-      <category term="python" scheme="http://yoursite.com/tags/python/"/>
-    
-      <category term="general tech" scheme="http://yoursite.com/categories/general-tech/"/>
-    
-  </entry>
+    <link rel="icon" href="/bitbug_favicon.ico">
   
-  <entry>
-    <title><![CDATA[json使用总结]]></title>
-    <link href="http://yoursite.com/2015/12/20/json%E4%BD%BF%E7%94%A8%E6%80%BB%E7%BB%93/"/>
-    <id>http://yoursite.com/2015/12/20/json使用总结/</id>
-    <published>2015-12-20T12:38:30.000Z</published>
-    <updated>2015-12-22T05:54:13.666Z</updated>
-    <content type="html"><![CDATA[<p>写爬虫的时候真的发现json很好用，作为一种序列化机制。。。恐怕没有更好理解的了。</p>
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+</head>
+<body>
+  <div id="container">
+    <div class="mobile-nav-panel">
+	<i class="icon-reorder icon-large"></i>
+</div>
+<header id="header">
+	<h1 class="blog-title">
+		<a href="/">RRRay</a>
+	</h1>
+	<nav class="nav">
+		<ul>
+			<li><a href="/">Home</a></li><li><a href="/archives">Archives</a></li>
+			<li><a id="nav-search-btn" class="nav-icon" title="Search"></a></li>
+			<li><a href="/atom.xml" id="nav-rss-link" class="nav-icon" title="RSS Feed"></a></li>
+		</ul>
+	</nav>
+	<div id="search-form-wrap">
+		<form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+	</div>
+</header>
+    <div id="main">
+      <article id="post-json使用总结" class="post">
+	<footer class="entry-meta-header">
+		<span class="meta-elements date">
+			<a href="/2015/12/20/json使用总结/" class="article-date">
+  <time datetime="2015-12-20T12:38:30.000Z" itemprop="datePublished">2015-12-20</time>
+</a>
+		</span>
+		<span class="meta-elements author">RRRay</span>
+		<div class="commentscount">
+			
+		</div>
+	</footer>
+	
+	<header class="entry-header">
+		
+  
+    <h1 class="article-title entry-title" itemprop="name">
+      json使用总结
+    </h1>
+  
+
+	</header>
+	<div class="entry-content">
+		
+    	<p>写爬虫的时候真的发现json很好用，作为一种序列化机制。。。恐怕没有更好理解的了。</p>
 <p>这里我的数据经历了：</p>
 <p><strong>网站–&gt;python爬虫–&gt;mysql数据库&lt;–&gt;php程序&lt;–&gt;java(安卓app)</strong></p>
  <a id="more"></a> 
@@ -125,45 +108,83 @@
 <h1 id="5_php-_26gt_3Bmysql"><a href="#5_php-_26gt_3Bmysql" class="headerlink" title="5 php-&gt;mysql"></a>5 php-&gt;mysql</h1><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$checkstate</span> = <span class="variable">$_POST</span>[<span class="string">'checkstate'</span>];</span><br><span class="line"></span><br><span class="line"><span class="variable">$checkobj</span> =  json_decode(<span class="variable">$checkstate</span>，<span class="keyword">true</span>);</span><br><span class="line"><span class="variable">$okArray</span> = <span class="variable">$checkobj</span>[<span class="string">'keptIds'</span>];</span><br></pre></td></tr></table></figure>
 <p>通过<a href="http://php.net/manual/en/function.json-decode.php" target="_blank" rel="external">json_decode</a>把从post变量里得到的jsonobj转换成php的关联数组(第二个参数true就是指定成关联数组返回)，这样就可以以键值对的方式获取jsonobj里的数据了。</p>
 <p><strong>总之，为了在网络上传递复杂的数据类型，json用统一的格式来组织数据，并以字符的形式在网络上进行传输，就像是一种中间表达，沟通客户端与服务端的数据表达。</strong></p>
-]]></content>
-    <summary type="html">
-    <![CDATA[<p>写爬虫的时候真的发现json很好用，作为一种序列化机制。。。恐怕没有更好理解的了。</p>
-<p>这里我的数据经历了：</p>
-<p><strong>网站–&gt;python爬虫–&gt;mysql数据库&lt;–&gt;php程序&lt;–&gt;java(安卓app)</strong></p>]]>
+
     
-    </summary>
+	</div>
+	<footer class="entry-footer">
+		<div class="entry-meta-footer">
+			<span class="category">
+				
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/general-tech/">general tech</a>
+  </div>
+
+			</span>
+			<span class="tags">
+				
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/">java</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/json/">json</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/php/">php</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/">python</a></li></ul>
+
+			</span>
+		</div>
+	</footer>
+	
     
-      <category term="java" scheme="http://yoursite.com/tags/java/"/>
-    
-      <category term="json" scheme="http://yoursite.com/tags/json/"/>
-    
-      <category term="php" scheme="http://yoursite.com/tags/php/"/>
-    
-      <category term="python" scheme="http://yoursite.com/tags/python/"/>
-    
-      <category term="general tech" scheme="http://yoursite.com/categories/general-tech/"/>
-    
-  </entry>
+<nav id="article-nav">
   
-  <entry>
-    <title><![CDATA[are you ok]]></title>
-    <link href="http://yoursite.com/2015/12/13/are-you-ok/"/>
-    <id>http://yoursite.com/2015/12/13/are-you-ok/</id>
-    <published>2015-12-13T08:03:20.000Z</published>
-    <updated>2015-12-13T08:27:21.993Z</updated>
-    <content type="html"><![CDATA[<p>总算是要准备开始写博客了！</p>
-<p>之前一直都是在用evernote当博客。。。</p>
-<p>这边可以用markdown感觉以后可能会把这个博客当做笔记吧==</p>
-]]></content>
-    <summary type="html">
-    <![CDATA[<p>总算是要准备开始写博客了！</p>
-<p>之前一直都是在用evernote当博客。。。</p>
-<p>这边可以用markdown感觉以后可能会把这个博客当做笔记吧==</p>
-]]>
-    </summary>
-    
-      <category term="helo, blog" scheme="http://yoursite.com/tags/helo-blog/"/>
-    
-  </entry>
+    <a href="/2015/12/20/learn-pyspider/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          learn pyspider
+        
+      </div>
+    </a>
   
-</feed>
+  
+    <a href="/2015/12/13/are-you-ok/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          are you ok
+        
+      </div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+
+
+    </div>
+    <div class="mb-search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:yoursite.com">
+  </form>
+</div>
+<footer id="footer">
+	<h1 class="footer-blog-title">
+		<a href="/">RRRay</a>
+	</h1>
+	<span class="copyright">
+		&copy; 2015 RRRay<br>
+		Modify from <a href="http://sanographix.github.io/tumblr/apollo/" target="_blank">Apollo</a> theme, designed by <a href="http://www.sanographix.net/" target="_blank">SANOGRAPHIX.NET</a><br>
+		Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+	</span>
+</footer>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js" type="text/javascript"></script>
+  </div>
+</body>
+</html>
