@@ -4,7 +4,7 @@
   
   <link href="/atom.xml" rel="self"/>
   <link href="http://yoursite.com/"/>
-  <updated>2015-12-23T19:28:46.897Z</updated>
+  <updated>2015-12-23T19:38:06.917Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -19,7 +19,7 @@
     <link href="http://yoursite.com/2015/12/24/akka-on-android/"/>
     <id>http://yoursite.com/2015/12/24/akka-on-android/</id>
     <published>2015-12-24T02:10:33.000Z</published>
-    <updated>2015-12-23T19:28:46.897Z</updated>
+    <updated>2015-12-23T19:38:06.917Z</updated>
     <content type="html"><![CDATA[<p><img src="https://camo.githubusercontent.com/72417659473b911df7f1bd03359de67685783ae7/687474703a2f2f6f2d6e322e636f6d2f766572626f736553696d706c652e706e67" alt=""></p>
 <p>如上图所示，这是另一种用scala组织android app代码的<a href="https://github.com/pocorall/scaloid" target="_blank" rel="external">框架</a>。还有一些别的组织方式，总体感觉用scala写android还是蛮爽的（不过不敢直接写app），特别是最近写的看的都是python，看scala会顺眼许多。</p>
 <p>scala环境没问题了，接下来就是加入akka。</p>
@@ -43,7 +43,7 @@
 </li>
 </ol>
 <figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">android</span> &#123;  </span><br><span class="line">    <span class="title">packagingOptions</span> &#123;    </span><br><span class="line">        <span class="title">pickFirst</span> <span class="string">'reference.conf'</span>  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>于是就这样就绝了这一问题。也是google了好久，当时看到这个issue的时候，楼已经盖得老高了，很多描述也不是很详细，居然让我有点联想到国内贴吧风格，差点放弃，不过最后是把整栋楼都读完了，才总结出了这个解决办法。<br>其实这个问题解决了之后，我的akka就这样真的在我的小米上跑起来了，是的，我成功了，我成功使android手机作为slave参与了一个akka框架的并行运算系统，并正确计算了一个三阶张量的计算问题。</p>
+<p>于是就这样解决了这一问题。也是google了好久，当时看到这个<a href="(https://code.google.com/p/android/issues/detail?id=61573">issue</a>)的时候，楼已经盖得老高了，很多描述也不是很详细，居然让我有点联想到国内贴吧风格，差点放弃，不过最后是把整栋楼都读完了，才总结出了这个解决办法。<br>其实这个问题解决了之后，我的akka就这样真的在我的小米上跑起来了，是的，我成功了，我成功使android手机作为slave参与了一个akka框架的并行运算系统，并正确使用一台手机，一台电脑作为slave,一台电脑作为master成功跑完了一个三阶张量的orthogonal问题。</p>
 <p>本该一切就这样结束了(ಥ _ ಥ)。</p>
 <h2 id="2-_g5_problem"><a href="#2-_g5_problem" class="headerlink" title="2. g5 problem"></a>2. g5 problem</h2><p>然而，并没有什么*用，因为某原因，我仍然需要在使得该程序在g5(api 10)，上跑起来。</p>
 <p>果然，傲娇的前辈g5没有跑通：</p>
@@ -69,9 +69,9 @@
 <p>然后我用小米同样试着跑了一下，发现一样的问题，所以是我前面的build过程仍然有问题。然而现在已知的错误信息只有这个，并且似乎只是简单地在阐述连接失败，并没有为何失败的信息。从这个节点已经查不下去了。</p>
 <p>这里我可以下结论说使用proguard来帮助g5构建akka失败。</p>
 <h3 id="u6240_u4EE5_u5E94_u8BE5_u4F7F_u7528_u7B2C_u4E8C_u4E2A_u65B9_u6CD5_2Cmultidex_uFF0C"><a href="#u6240_u4EE5_u5E94_u8BE5_u4F7F_u7528_u7B2C_u4E8C_u4E2A_u65B9_u6CD5_2Cmultidex_uFF0C" class="headerlink" title="所以应该使用第二个方法,multidex，"></a>所以应该使用第二个方法,multidex，</h3><p>然而事实是：</p>
-<pre><code>scala sample——[simple](https://github.com/saturday06/gradle-android-scala-plugin/tree/master/sample/simple)
-本身就是使用了multidex,在已经在android 5.0 上可以跑通的情况下,在g5上跑出现了上述mismatch的问题。
-然后在这个问题下又看到了使用multidex解决的方案。。信息已经消耗完了。
+<p>scala sample,<a href="https://github.com/saturday06/gradle-android-scala-plugin/tree/master/sample/simple" target="_blank" rel="external">simple</a>  </p>
+<pre><code>本身就是使用了multidex,在已经在android 5.0 上可以跑通的情况下,在g5上跑出现了上述mismatch的问题。
+然后在这个问题下又看到了使用multidex解决的方案。。在g5上解决DEX 64K Methods Limit，信息已经消耗完了。
 </code></pre><p>另外，我有重新去看了<a href="http://developer.android.com/tools/building/multidex.html" target="_blank" rel="external">Building Apps with Over 65K Methods</a>,写到：<br><blockquote><p>Applications that use multidex may not start on devices that run versions of the platform earlier than Android 4.0 (API level 14) due to a Dalvik linearAlloc bug (Issue 22586). If you are targeting API levels earlier than 14, make sure to perform testing with these versions of the platform as your application can have issues at startup or when particular groups of classes are loaded. Code shrinking can reduce or possibly eliminate these potential issues.  </p>
 <p>Applications using a multidex configuration that make very large memory allocation requests may crash during run time due to a Dalvik linearAlloc limit (Issue 78035). The allocation limit was increased in Android 4.0 (API level 14), but apps may still run into this limit on Android versions prior to Android 5.0 (API level 21).</p>
 </blockquote></p>
@@ -79,7 +79,7 @@
 <p>官方出于官方规范的考虑下了如此结论，民间出高人，再google一下？果然真有这样的文章<a href="http://www.birbit.com/how-to-solve-linearalloc-problem/" target="_blank" rel="external">How to Solve LinearAlloc Problem</a></p>
 <p>不过看起来略复杂。。，至少现在我要缓一缓了，也许恢复元气可以一试。-_-!</p>
 <h2 id="conclusion"><a href="#conclusion" class="headerlink" title="conclusion"></a>conclusion</h2><p>所以其实这整个过程，如果不看g5，已经做到了使用scala写android程序，以及在Android5.0设备上使用akka，使移动设备成为一个并行系统的slave进行工作。</p>
-<p>至于g5的结论就是，即使是build过程解决了method limit问题，然而run的过程中仍有<strong>Dalvik linearAlloc bug</strong>. scala&amp;akka-actor&amp;akka-remote`这种规模的依赖库在android4.0之前跑的可能性不太大，android5.0则完整解决了DEX 64K Methods Limit以及LinearAlloc Problem，可以使用这种规模的依赖库。</p>
+<p>至于g5的结论就是，即使是build过程解决了method limit问题，然而run的过程中仍有<strong>Dalvik linearAlloc bug</strong>. <code>scala&amp;akka-actor&amp;akka-remote</code>这种规模的依赖库在android4.0之前跑的可能性不太大，android5.0则完整解决了DEX 64K Methods Limit以及LinearAlloc Problem，可以使用这种规模的依赖库。</p>
 ]]></content>
     <summary type="html">
     <![CDATA[<p><img src="https://camo.githubusercontent.com/72417659473b911df7f1bd03359de67685783ae7/687474703a2f2f6f2d6e322e636f6d2f766572626f736553696d706c652e706e67" alt=""></p>
