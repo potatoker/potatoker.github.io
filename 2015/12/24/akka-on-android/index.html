@@ -6,25 +6,19 @@
   <title>akka-on-android | RRRay</title>
   <meta name="viewport" content="width=device-width">
   <meta name="description" content="如上图所示，这是另一种用scala组织android app代码的框架。还有一些别的组织方式，总体感觉用scala写android还是蛮爽的（不过不敢直接写app），特别是最近写的看的都是python，看scala会顺眼许多。
-scala环境没问题了，接下来就是加入akka。
-正常来说：
-123456dependencies &amp;#123;    compile &quot;org.scala-lang:sc">
+scala环境没问题了，接下来就是加入akka。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="akka-on-android">
 <meta property="og:url" content="http://yoursite.com/2015/12/24/akka-on-android/index.html">
 <meta property="og:site_name" content="RRRay">
 <meta property="og:description" content="如上图所示，这是另一种用scala组织android app代码的框架。还有一些别的组织方式，总体感觉用scala写android还是蛮爽的（不过不敢直接写app），特别是最近写的看的都是python，看scala会顺眼许多。
-scala环境没问题了，接下来就是加入akka。
-正常来说：
-123456dependencies &amp;#123;    compile &quot;org.scala-lang:sc">
+scala环境没问题了，接下来就是加入akka。">
 <meta property="og:image" content="https://camo.githubusercontent.com/72417659473b911df7f1bd03359de67685783ae7/687474703a2f2f6f2d6e322e636f6d2f766572626f736553696d706c652e706e67">
-<meta property="og:updated_time" content="2015-12-23T19:27:07.044Z">
+<meta property="og:updated_time" content="2015-12-23T19:28:46.897Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="akka-on-android">
 <meta name="twitter:description" content="如上图所示，这是另一种用scala组织android app代码的框架。还有一些别的组织方式，总体感觉用scala写android还是蛮爽的（不过不敢直接写app），特别是最近写的看的都是python，看scala会顺眼许多。
-scala环境没问题了，接下来就是加入akka。
-正常来说：
-123456dependencies &amp;#123;    compile &quot;org.scala-lang:sc">
+scala环境没问题了，接下来就是加入akka。">
   
     <link rel="alternative" href="/atom.xml" title="RRRay" type="application/atom+xml">
   
@@ -83,6 +77,7 @@ scala环境没问题了，接下来就是加入akka。
     	<p><img src="https://camo.githubusercontent.com/72417659473b911df7f1bd03359de67685783ae7/687474703a2f2f6f2d6e322e636f6d2f766572626f736553696d706c652e706e67" alt=""></p>
 <p>如上图所示，这是另一种用scala组织android app代码的<a href="https://github.com/pocorall/scaloid" target="_blank" rel="external">框架</a>。还有一些别的组织方式，总体感觉用scala写android还是蛮爽的（不过不敢直接写app），特别是最近写的看的都是python，看scala会顺眼许多。</p>
 <p>scala环境没问题了，接下来就是加入akka。</p>
+<a id="more"></a>
 <p>正常来说：</p>
 <figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">dependencies</span> &#123;</span><br><span class="line">    <span class="keyword">compile</span> <span class="string">"org.scala-lang:scala-library:2.11.7"</span></span><br><span class="line">    <span class="keyword">compile</span> <span class="string">"com.android.support:multidex:1.0.1"</span></span><br><span class="line">    <span class="keyword">compile</span> <span class="string">'com.typesafe.akka:akka-actor_2.11:2.3.9'</span></span><br><span class="line">    <span class="keyword">compile</span> <span class="string">'com.typesafe.akka:akka-remote_2.11:2.3.9'</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>把akka的库依赖加入gradle文件，完事。但事实是问题接二连三</p>

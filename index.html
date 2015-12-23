@@ -71,66 +71,14 @@
 	</header>
 	<div class="entry-content">
 		
-    	<p><img src="https://camo.githubusercontent.com/72417659473b911df7f1bd03359de67685783ae7/687474703a2f2f6f2d6e322e636f6d2f766572626f736553696d706c652e706e67" alt=""></p>
-<p>如上图所示，这是另一种用scala组织android app代码的<a href="https://github.com/pocorall/scaloid" target="_blank" rel="external">框架</a>。还有一些别的组织方式，总体感觉用scala写android还是蛮爽的（不过不敢直接写app），特别是最近写的看的都是python，看scala会顺眼许多。</p>
+			<p><img src="https://camo.githubusercontent.com/72417659473b911df7f1bd03359de67685783ae7/687474703a2f2f6f2d6e322e636f6d2f766572626f736553696d706c652e706e67" alt=""></p>
+<p>如上图所示，这是另一种用scala组织android app代码的<a href="https://github.com/pocorall/scaloid">框架</a>。还有一些别的组织方式，总体感觉用scala写android还是蛮爽的（不过不敢直接写app），特别是最近写的看的都是python，看scala会顺眼许多。</p>
 <p>scala环境没问题了，接下来就是加入akka。</p>
-<p>正常来说：</p>
-<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">dependencies</span> &#123;</span><br><span class="line">    <span class="keyword">compile</span> <span class="string">"org.scala-lang:scala-library:2.11.7"</span></span><br><span class="line">    <span class="keyword">compile</span> <span class="string">"com.android.support:multidex:1.0.1"</span></span><br><span class="line">    <span class="keyword">compile</span> <span class="string">'com.typesafe.akka:akka-actor_2.11:2.3.9'</span></span><br><span class="line">    <span class="keyword">compile</span> <span class="string">'com.typesafe.akka:akka-remote_2.11:2.3.9'</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>把akka的库依赖加入gradle文件，完事。但事实是问题接二连三</p>
-<h2 id="1-_Gradle_duplicate_file_exception"><a href="#1-_Gradle_duplicate_file_exception" class="headerlink" title="1. Gradle duplicate file exception"></a>1. Gradle duplicate file exception</h2><p>当时，具体的错误信息找不到了，不过我的解决方案是在这个<a href="https://code.google.com/p/android/issues/detail?id=61573" target="_blank" rel="external">issue</a>下面找到的,如他描述的，在两个jar中包含相同的文件。但师兄用sbt构建过相同的程序。为什么gradle会出现不得而知。</p>
-<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">error: duplicate files during packaging of APK .../basic/build/apk/basic-debug-unaligned<span class="class">.apk</span></span><br><span class="line">	Path <span class="keyword">in</span> archive: about<span class="class">.html</span></span><br><span class="line">	Origin <span class="number">1</span>: ...filestore/org<span class="class">.eclipse</span><span class="class">.jetty</span>/jetty-servlet/<span class="number">8.1</span>.<span class="number">8</span>.v20121106/jar/<span class="number">285</span>ea47746e9ab988a8291ea9fd6545b537e0ce9/jetty-servlet-<span class="number">8.1</span>.<span class="number">8</span><span class="class">.v20121106</span><span class="class">.jar</span></span><br><span class="line">	Origin <span class="number">2</span>: ...filestore/org<span class="class">.eclipse</span><span class="class">.jetty</span>/jetty-client/<span class="number">8.1</span>.<span class="number">8</span>.v20121106/jar/f194a5a07ada9dab48e226c4e8152d120ce1e76f/jetty-client-<span class="number">8.1</span>.<span class="number">8</span><span class="class">.v20121106</span><span class="class">.jar</span></span><br></pre></td></tr></table></figure>
-<p>我的库依赖为</p>
-<pre><code>&apos;com.typesafe.akka:akka-actor_2.11:2.3.9&apos;
-&apos;com.typesafe.akka:akka-remote_2.11:2.3.9&apos;
-</code></pre><p>类似于上述代买中的错误信息，console提示我这两个jar，包含了本地path:</p>
-<pre><code>C:\Users\Ray\.ivy2\cache\com.typesafe.akka\....
-</code></pre><p>然后我来到这个位置，扎到上述两个jar，打开后发现确实，其中包含同名文件：reference.conf，可以判断是这个原因gradle显示duplicate file error， 然而我发现这两个文件内容并不相同。我猜想是因为同名的原因，因此我将这两个conf分别加了相应的前缀。然而仍然不可行，至于是什么错误我没有记录。但我觉得确实可能有问题，因为修改文件名应该谨慎，其他地方可能有引用。如此寻找其他的方法。</p>
-<p>最终，根据上文中的issue，试出来的办法是：</p>
-<ol>
-<li><p>merge这两份conf文件，因为其实发现这两个配置文件确实仍然有重复的部分，而且都是类json的键值对数据组织方式，所以把其中一份所有的内容加到另一份中，并保证不重复。</p>
-</li>
-<li><p>在gradle中去重。<br>因为实际上我采取的策略是只使用一份conf文件，但这份conf包含之前两份的功能，但是我并没有删除任何一份，我把这份merge 过的文件加入到上述两个jar钟，这样，我就成了两份<strong>真正</strong>相同文件的去重问题了。</p>
-</li>
-</ol>
-<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">android</span> &#123;  </span><br><span class="line">    <span class="title">packagingOptions</span> &#123;    </span><br><span class="line">        <span class="title">pickFirst</span> <span class="string">'reference.conf'</span>  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>于是就这样就绝了这一问题。也是google了好久，当时看到这个issue的时候，楼已经盖得老高了，很多描述也不是很详细，居然让我有点联想到国内贴吧风格，差点放弃，不过最后是把整栋楼都读完了，才总结出了这个解决办法。<br>其实这个问题解决了之后，我的akka就这样真的在我的小米上跑起来了，是的，我成功了，我成功使android手机作为slave参与了一个akka框架的并行运算系统，并正确计算了一个三阶张量的计算问题。</p>
-<p>本该一切就这样结束了(ಥ _ ಥ)。</p>
-<h2 id="2-_g5_problem"><a href="#2-_g5_problem" class="headerlink" title="2. g5 problem"></a>2. g5 problem</h2><p>然而，并没有什么*用，因为某原因，我仍然需要在使得该程序在g5(api 10)，上跑起来。</p>
-<p>果然，傲娇的前辈g5没有跑通：</p>
-<p>我出现了类似这个<a href="http://stackoverflow.com/questions/23438213/package-has-mismatched-uid-10124-on-disk-10134-in-settings" target="_blank" rel="external">SO</a>上的问题：</p>
-<pre><code>Package has mismatched uid: 10124 on disk, 10134 in settings
-
- E/dalvikvm( 7815): LinearAlloc exceeded capacity (5242880), last=1092
-</code></pre><p>这个问题也是goolge了好久才觉得这个解释的比较清楚了。总之仍然是某种容量不足的原因。仍然需要用上一篇所述的两种办法</p>
-<blockquote><p>Solutions:</p>
-<p>Proguard: Proguard removes unreferenced classes/methods from your app. Thus your app’s dex file size decreases. (I’ve solved my problem with proguard)  </p>
-<p>Multiple Dex Files: Split your app to multiple dex files. <a href="https://www.facebook.com/notes/facebook-engineering/under-the-hood-dalvik-patch-for-facebook-for-android/10151345597798920" target="_blank" rel="external">Facebook</a> has a solution for this. Also read this <a href="http://android-developers.blogspot.se/2011/07/custom-class-loading-in-dalvik.html" target="_blank" rel="external">link</a> for managing multiple dex files.</p>
-</blockquote>
-<h3 id="u6240_u4EE5_u6211_u548C_u7B54_u8005_u4E00_u6837_uFF0C_u9996_u5148_u91C7_u53D6_u4E86_u7B2C_u4E00_u79CD_u65B9_u6CD5_u3002"><a href="#u6240_u4EE5_u6211_u548C_u7B54_u8005_u4E00_u6837_uFF0C_u9996_u5148_u91C7_u53D6_u4E86_u7B2C_u4E00_u79CD_u65B9_u6CD5_u3002" class="headerlink" title="所以我和答者一样，首先采取了第一种方法。"></a>所以我和答者一样，首先采取了第一种方法。</h3><p>做法就是上一篇中描述的傻瓜式：</p>
-<ol>
-<li>在gradle中说明启用proguard及其相关rule。</li>
-<li>在网上查找akka库是否已经有现成的proguard rule文件，有则使用。</li>
-<li>别人的rule并不一定完全适用，build的时候会出现class not found的问题</li>
-<li>根据错误提示，增加keep 规则</li>
-<li>重复3,4直至build和run的时候都没有classNotFound的问题</li>
-</ol>
-<p>在这个过程中数度想要放弃<br><strong>BUT</strong>确实到最后没有classNotFound的问题了，build也成功了，然而新问题是：</p>
-<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="number">11</span>:<span class="number">27</span>:<span class="number">42.149</span>] [WorkerSystem-akka.remote.default-remote-dispatcher-<span class="number">6</span>] [akka.tcp:<span class="regexp">//</span>WorkerSystem<span class="variable">@192</span>.<span class="number">168.1</span>.<span class="number">108</span>:<span class="number">2555</span>/<span class="keyword">system</span>/endpointManager/reliableEndpointWriter-akka.tcp<span class="variable">%3A</span><span class="variable">%2F</span><span class="variable">%2FParallelHOSVD</span><span class="variable">%40192</span>.<span class="number">168.1</span>.<span class="number">102</span><span class="variable">%3A2552</span>-<span class="number">0</span>] Association with remote <span class="keyword">system</span> [akka.tcp:<span class="regexp">//</span>ParallelHOSVD<span class="variable">@192</span>.<span class="number">168.1</span>.<span class="number">102</span>:<span class="number">2552</span>] has failed, address is now gated <span class="keyword">for</span> [<span class="number">5000</span>] ms. Reason is: [exception during creation].</span><br></pre></td></tr></table></figure>
-<p>然后我用小米同样试着跑了一下，发现一样的问题，所以是我前面的build过程仍然有问题。然而现在已知的错误信息只有这个，并且似乎只是简单地在阐述连接失败，并没有为何失败的信息。从这个节点已经查不下去了。</p>
-<p>这里我可以下结论说使用proguard来帮助g5构建akka失败。</p>
-<h3 id="u6240_u4EE5_u5E94_u8BE5_u4F7F_u7528_u7B2C_u4E8C_u4E2A_u65B9_u6CD5_2Cmultidex_uFF0C"><a href="#u6240_u4EE5_u5E94_u8BE5_u4F7F_u7528_u7B2C_u4E8C_u4E2A_u65B9_u6CD5_2Cmultidex_uFF0C" class="headerlink" title="所以应该使用第二个方法,multidex，"></a>所以应该使用第二个方法,multidex，</h3><p>然而事实是：</p>
-<pre><code>scala sample——[simple](https://github.com/saturday06/gradle-android-scala-plugin/tree/master/sample/simple)
-本身就是使用了multidex,在已经在android 5.0 上可以跑通的情况下,在g5上跑出现了上述mismatch的问题。
-然后在这个问题下又看到了使用multidex解决的方案。。信息已经消耗完了。
-</code></pre><p>另外，我有重新去看了<a href="http://developer.android.com/tools/building/multidex.html" target="_blank" rel="external">Building Apps with Over 65K Methods</a>,写到：<br><blockquote><p>Applications that use multidex may not start on devices that run versions of the platform earlier than Android 4.0 (API level 14) due to a Dalvik linearAlloc bug (Issue 22586). If you are targeting API levels earlier than 14, make sure to perform testing with these versions of the platform as your application can have issues at startup or when particular groups of classes are loaded. Code shrinking can reduce or possibly eliminate these potential issues.  </p>
-<p>Applications using a multidex configuration that make very large memory allocation requests may crash during run time due to a Dalvik linearAlloc limit (Issue 78035). The allocation limit was increased in Android 4.0 (API level 14), but apps may still run into this limit on Android versions prior to Android 5.0 (API level 21).</p>
-</blockquote></p>
-<p>4.0之前是may crush，4.0提升了allocation limit，然而描述仍然是may still run into this limit.只有5.0做了保证。my poor g5是2.3.7,我哪来的胆子拿着这个去跑分布式？</p>
-<p>官方出于官方规范的考虑下了如此结论，民间出高人，再google一下？果然真有这样的文章<a href="http://www.birbit.com/how-to-solve-linearalloc-problem/" target="_blank" rel="external">How to Solve LinearAlloc Problem</a></p>
-<p>不过看起来略复杂。。，至少现在我要缓一缓了，也许恢复元气可以一试。-_-!</p>
-<h2 id="conclusion"><a href="#conclusion" class="headerlink" title="conclusion"></a>conclusion</h2><p>所以其实这整个过程，如果不看g5，已经做到了使用scala写android程序，以及在Android5.0设备上使用akka，使移动设备成为一个并行系统的slave进行工作。</p>
-<p>至于g5的结论就是，即使是build过程解决了method limit问题，然而run的过程中仍有<strong>Dalvik linearAlloc bug</strong>. scala&amp;akka-actor&amp;akka-remote`这种规模的依赖库在android4.0之前跑的可能性不太大，android5.0则完整解决了DEX 64K Methods Limit以及LinearAlloc Problem，可以使用这种规模的依赖库。</p>
-
+			
+				<p class="article-more-link">
+					<a href="/2015/12/24/akka-on-android/#more">more</a>
+				</p>
+      
     
 	</div>
 	<footer class="entry-footer">
