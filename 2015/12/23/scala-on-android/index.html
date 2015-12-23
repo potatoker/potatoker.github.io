@@ -27,7 +27,7 @@
 丧心病狂的来了，由于某种更加扭曲的实验方式的限制，最终实验必须要在一台N5上跑起来。
 
 恩，先压抑住吐槽">
-<meta property="og:updated_time" content="2015-12-23T01:28:56.584Z">
+<meta property="og:updated_time" content="2015-12-23T01:35:46.967Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="scala on android">
 <meta name="twitter:description" content="今天大概要宣布第一条路走不通了。
@@ -121,7 +121,7 @@ You may try using --multi-dex option.
 <h3 id="1-_use_proguard"><a href="#1-_use_proguard" class="headerlink" title="1. use proguard."></a>1. use proguard.</h3><p>android devloper上有简单地概念介绍：</p>
 <blockquote><p>The ProGuard tool shrinks, optimizes, and obfuscates your code by removing unused code and renaming classes, fields, and methods with semantically obscure names. The result is a smaller sized .apk file that is more difficult to reverse engineer.</p>
 <footer><strong>ProGuard</strong><cite><a href="http://developer.android.com/tools/help/proguard.html" target="_blank" rel="external">developer.android.com/tools/help/proguard.html</a></cite></footer></blockquote>
-<p>这东西有两个作用，一个是减小apk的大小，一个是对方法名进行混淆。我需要用到他的第二个作用，思路就是引用的库中，很多方法其实根本用不到，所以proguard就会帮助build tool把引用到的那一部分加入编译。那么他是怎么判断哪些方法该被加入编译，哪些是没用的呢，这东西还没有那么智能。。需要一份rules来规定哪些方法和类是需要保存的，虽然sdk tool自带一份默认的rules，但是！一般情况还是需要debug一下，然后手动修改rules文件。如果是第三方的jar包，那就更没得跑了。<br>但是这个东西当我第一次看到他的使用<a href="https://stuff.mit.edu/afs/sipb/project/android/sdk/android-sdk-linux/tools/proguard/docs/index.html#manual/introduction.html" target="_blank" rel="external">文档</a>的时候，就方了，这种朴素的markdown风格加上瀑布一般的排版。。。看不下去。。。总之原理基本上是，根据控制台输出的错误信息，一般是，方法或者类丢失，说明proguard丢弃了这个方法或类，那么在rule文件里把有完全限定名的类使用keep语句手动保留，就可以了。比较典型的有下面两种：  </p>
+<p>这东西有两个作用，一个是减小apk的大小，一个是对方法名进行混淆。我需要用到他的第一个作用，思路就是引用的库中，很多方法其实根本用不到，所以proguard就会帮助build tool把引用到的那一部分加入编译，这样就不会使dex文件过大。那么他是怎么判断哪些方法该被加入编译，哪些是没用的呢，这东西还没有那么智能。。需要一份rules来规定哪些方法和类是需要保存的，虽然sdk tool自带一份默认的rules，但是！一般情况还是需要debug一下，然后手动修改rules文件。如果是第三方的jar包，那就更没得跑了。<br>但是这个东西当我第一次看到他的使用<a href="https://stuff.mit.edu/afs/sipb/project/android/sdk/android-sdk-linux/tools/proguard/docs/index.html#manual/introduction.html" target="_blank" rel="external">文档</a>的时候，就方了，这种朴素的markdown风格加上瀑布一般的排版。。。看不下去。。。总之原理基本上是，根据控制台输出的错误信息，一般是，方法或者类丢失，说明proguard丢弃了这个方法或类，那么在rule文件里把有完全限定名的类使用keep语句手动保留，就可以了。比较典型的有下面两种：  </p>
 <pre><code>如果Build过程提示classNotFound或者methodNotFound就直接keep 
 </code></pre><figure class="highlight xquery"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-keep class akka.actor.LocalActorRefProvider<span class="variable">$Guardian</span>&#123;</span><br><span class="line">  *;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>如果告诉你类似<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java.lang.RuntimeException: Unable to <span class="operator"><span class="keyword">start</span> activity ComponentInfo&#123;com.myapp/com.myapp.MyActivity&#125;: <span class="keyword">java</span>.lang.NoSuchMethodException: &lt;init&gt; [<span class="keyword">interface</span> com.typesafe.config.Config, <span class="keyword">interface</span> akka.<span class="keyword">event</span>.LoggingAdapter, <span class="keyword">interface</span> <span class="keyword">java</span>.util.<span class="keyword">concurrent</span>.ThreadFactory]</span></span><br></pre></td></tr></table></figure></p>
