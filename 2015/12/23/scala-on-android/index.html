@@ -28,7 +28,7 @@
 
 恩，先压抑住吐槽">
 <meta property="og:image" content="https://camo.githubusercontent.com/72417659473b911df7f1bd03359de67685783ae7/687474703a2f2f6f2d6e322e636f6d2f766572626f736553696d706c652e706e67">
-<meta property="og:updated_time" content="2015-12-24T22:11:15.058Z">
+<meta property="og:updated_time" content="2015-12-24T22:14:04.563Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="scala on android">
 <meta name="twitter:description" content="今天大概要宣布第一条路走不通了。
@@ -132,7 +132,7 @@ You may try using --multi-dex option.
 </blockquote></p>
 <p>其实主要是在gradle的build文件中添加multidex方法的依赖库，然后修改一些关联的配置<br><figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">dependencies</span> &#123;</span><br><span class="line">  <span class="keyword">compile</span> <span class="string">'com.android.support:multidex:1.0.0'</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>  </p>
 <p>详细的内容太仍然在<a href="https://developer.android.com/tools/building/multidex.html#mdex-gradle" target="_blank" rel="external">Configuring Your App for Multidex with Gradle</a> 。</p>
-<p>这里有非常重要的一点是multidex方法不能直接适用于低端机，我使用的是android 5.0device，在akka-on-andorid中我使用了multidex试图解决大型库依赖的问题，但会产生另外的问题。但是Android 2.3.7使用proguard之后是可以跑这个scala库的。</p>
+<p><strong>这里有非常重要的一点是multidex方法不能直接适用于低端机，我使用的是android 5.0device，在akka-on-andorid中我使用了multidex试图解决大型库依赖的问题，但会产生另外的问题。但是Android 2.3.7使用proguard之后是可以跑这个scala库的。</strong></p>
 <p>题外话：</p>
 <p>想起毕设的时候就用到过dex，不过仍然是懵懵懂懂，又是kd移动分布式任务处理。。。通过用sdk tool可以把jar转换成dex, 这样一个dex就是分块任务，从而方便任务的分发与调用。看到Multidex lib的机制就想到了这么一件事。</p>
 <h3 id="in_the_end"><a href="#in_the_end" class="headerlink" title="in the end"></a>in the end</h3><p>总结一下，在android上使用scala:</p>
