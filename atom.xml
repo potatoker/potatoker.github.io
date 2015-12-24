@@ -3,9 +3,9 @@
   <title><![CDATA[RRRay]]></title>
   
   <link href="/atom.xml" rel="self"/>
-  <link href="http://yoursite.com/"/>
+  <link href="http://potatoker.github.io/"/>
   <updated>2015-12-24T00:26:36.759Z</updated>
-  <id>http://yoursite.com/</id>
+  <id>http://potatoker.github.io/</id>
   
   <author>
     <name><![CDATA[RRRay]]></name>
@@ -16,8 +16,8 @@
   
   <entry>
     <title><![CDATA[akka-on-android]]></title>
-    <link href="http://yoursite.com/2015/12/24/akka-on-android/"/>
-    <id>http://yoursite.com/2015/12/24/akka-on-android/</id>
+    <link href="http://potatoker.github.io/2015/12/24/akka-on-android/"/>
+    <id>http://potatoker.github.io/2015/12/24/akka-on-android/</id>
     <published>2015-12-24T02:10:33.000Z</published>
     <updated>2015-12-24T00:26:36.759Z</updated>
     <content type="html"><![CDATA[<p>scala环境没问题了，接下来就是加入akka。<br>其实真正麻烦的在akka的库调用上。。特别是proguard rule的debug简直是摸瞎。(ಥ _ ಥ)</p>
@@ -93,22 +93,22 @@
     
     </summary>
     
-      <category term="akka" scheme="http://yoursite.com/tags/akka/"/>
+      <category term="akka" scheme="http://potatoker.github.io/tags/akka/"/>
     
-      <category term="android" scheme="http://yoursite.com/tags/android/"/>
+      <category term="android" scheme="http://potatoker.github.io/tags/android/"/>
     
-      <category term="build" scheme="http://yoursite.com/tags/build/"/>
+      <category term="build" scheme="http://potatoker.github.io/tags/build/"/>
     
-      <category term="parallel" scheme="http://yoursite.com/tags/parallel/"/>
+      <category term="parallel" scheme="http://potatoker.github.io/tags/parallel/"/>
     
-      <category term="android" scheme="http://yoursite.com/categories/android/"/>
+      <category term="android" scheme="http://potatoker.github.io/categories/android/"/>
     
   </entry>
   
   <entry>
     <title><![CDATA[scala on android]]></title>
-    <link href="http://yoursite.com/2015/12/23/scala-on-android/"/>
-    <id>http://yoursite.com/2015/12/23/scala-on-android/</id>
+    <link href="http://potatoker.github.io/2015/12/23/scala-on-android/"/>
+    <id>http://potatoker.github.io/2015/12/23/scala-on-android/</id>
     <published>2015-12-23T07:11:30.000Z</published>
     <updated>2015-12-24T00:20:54.160Z</updated>
     <content type="html"><![CDATA[<p>今天大概要宣布第一条路走不通了。</p>
@@ -175,20 +175,20 @@ You may try using --multi-dex option.
     
     </summary>
     
-      <category term="android" scheme="http://yoursite.com/tags/android/"/>
+      <category term="android" scheme="http://potatoker.github.io/tags/android/"/>
     
-      <category term="proguard" scheme="http://yoursite.com/tags/proguard/"/>
+      <category term="proguard" scheme="http://potatoker.github.io/tags/proguard/"/>
     
-      <category term="scala" scheme="http://yoursite.com/tags/scala/"/>
+      <category term="scala" scheme="http://potatoker.github.io/tags/scala/"/>
     
-      <category term="android" scheme="http://yoursite.com/categories/android/"/>
+      <category term="android" scheme="http://potatoker.github.io/categories/android/"/>
     
   </entry>
   
   <entry>
     <title><![CDATA[cat]]></title>
-    <link href="http://yoursite.com/2015/12/23/cat/"/>
-    <id>http://yoursite.com/2015/12/23/cat/</id>
+    <link href="http://potatoker.github.io/2015/12/23/cat/"/>
+    <id>http://potatoker.github.io/2015/12/23/cat/</id>
     <published>2015-12-23T06:33:28.000Z</published>
     <updated>2015-12-23T06:33:28.503Z</updated>
     <content type="html"></content>
@@ -200,8 +200,8 @@ You may try using --multi-dex option.
   
   <entry>
     <title><![CDATA[learn pyspider]]></title>
-    <link href="http://yoursite.com/2015/12/20/learn-pyspider/"/>
-    <id>http://yoursite.com/2015/12/20/learn-pyspider/</id>
+    <link href="http://potatoker.github.io/2015/12/20/learn-pyspider/"/>
+    <id>http://potatoker.github.io/2015/12/20/learn-pyspider/</id>
     <published>2015-12-20T14:34:32.000Z</published>
     <updated>2015-12-22T05:55:22.499Z</updated>
     <content type="html"><![CDATA[<p>虽然知道当时实验室的活以及随之到来的各种考试已经占满了时间表，但是仅仅因为我自己很想做，还是接下来了。</p>
@@ -264,18 +264,18 @@ You may try using --multi-dex option.
     
     </summary>
     
-      <category term="crawler" scheme="http://yoursite.com/tags/crawler/"/>
+      <category term="crawler" scheme="http://potatoker.github.io/tags/crawler/"/>
     
-      <category term="python" scheme="http://yoursite.com/tags/python/"/>
+      <category term="python" scheme="http://potatoker.github.io/tags/python/"/>
     
-      <category term="general tech" scheme="http://yoursite.com/categories/general-tech/"/>
+      <category term="general tech" scheme="http://potatoker.github.io/categories/general-tech/"/>
     
   </entry>
   
   <entry>
     <title><![CDATA[json使用总结]]></title>
-    <link href="http://yoursite.com/2015/12/20/json%E4%BD%BF%E7%94%A8%E6%80%BB%E7%BB%93/"/>
-    <id>http://yoursite.com/2015/12/20/json使用总结/</id>
+    <link href="http://potatoker.github.io/2015/12/20/json%E4%BD%BF%E7%94%A8%E6%80%BB%E7%BB%93/"/>
+    <id>http://potatoker.github.io/2015/12/20/json使用总结/</id>
     <published>2015-12-20T12:38:30.000Z</published>
     <updated>2015-12-22T05:54:13.666Z</updated>
     <content type="html"><![CDATA[<p>写爬虫的时候真的发现json很好用，作为一种序列化机制。。。恐怕没有更好理解的了。</p>
@@ -317,22 +317,22 @@ You may try using --multi-dex option.
     
     </summary>
     
-      <category term="java" scheme="http://yoursite.com/tags/java/"/>
+      <category term="java" scheme="http://potatoker.github.io/tags/java/"/>
     
-      <category term="json" scheme="http://yoursite.com/tags/json/"/>
+      <category term="json" scheme="http://potatoker.github.io/tags/json/"/>
     
-      <category term="php" scheme="http://yoursite.com/tags/php/"/>
+      <category term="php" scheme="http://potatoker.github.io/tags/php/"/>
     
-      <category term="python" scheme="http://yoursite.com/tags/python/"/>
+      <category term="python" scheme="http://potatoker.github.io/tags/python/"/>
     
-      <category term="general tech" scheme="http://yoursite.com/categories/general-tech/"/>
+      <category term="general tech" scheme="http://potatoker.github.io/categories/general-tech/"/>
     
   </entry>
   
   <entry>
     <title><![CDATA[are you ok]]></title>
-    <link href="http://yoursite.com/2015/12/13/are-you-ok/"/>
-    <id>http://yoursite.com/2015/12/13/are-you-ok/</id>
+    <link href="http://potatoker.github.io/2015/12/13/are-you-ok/"/>
+    <id>http://potatoker.github.io/2015/12/13/are-you-ok/</id>
     <published>2015-12-13T08:03:20.000Z</published>
     <updated>2015-12-13T08:27:21.993Z</updated>
     <content type="html"><![CDATA[<p>总算是要准备开始写博客了！</p>
@@ -346,7 +346,7 @@ You may try using --multi-dex option.
 ]]>
     </summary>
     
-      <category term="helo, blog" scheme="http://yoursite.com/tags/helo-blog/"/>
+      <category term="helo, blog" scheme="http://potatoker.github.io/tags/helo-blog/"/>
     
   </entry>
   
