@@ -11,7 +11,7 @@
 <meta property="og:url" content="http://potatoker.github.io/2015/12/24/akka-on-android/index.html">
 <meta property="og:site_name" content="RRRay">
 <meta property="og:description" content="scala环境没问题了，接下来就是加入akka。其实真正麻烦的在akka的库调用上。。特别是proguard rule的debug简直是摸瞎。(ಥ _ ಥ)">
-<meta property="og:updated_time" content="2015-12-24T21:47:11.120Z">
+<meta property="og:updated_time" content="2015-12-24T22:27:49.802Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="akka-on-android">
 <meta name="twitter:description" content="scala环境没问题了，接下来就是加入akka。其实真正麻烦的在akka的库调用上。。特别是proguard rule的debug简直是摸瞎。(ಥ _ ಥ)">
@@ -101,12 +101,11 @@
 <pre><code>Package has mismatched uid: 10124 on disk, 10134 in settings
 
  E/dalvikvm( 7815): LinearAlloc exceeded capacity (5242880), last=1092
-</code></pre><p>这个问题也是goolge了好久才觉得这个解释的比较清楚了。按照这个答案的描述仍然需要用上一篇所述的两种办法</p>
-<blockquote><p>Solutions:</p>
+</code></pre><blockquote><p>Solutions:</p>
 <p>Proguard: Proguard removes unreferenced classes/methods from your app. Thus your app’s dex file size decreases. (I’ve solved my problem with proguard)  </p>
 <p>Multiple Dex Files: Split your app to multiple dex files. <a href="https://www.facebook.com/notes/facebook-engineering/under-the-hood-dalvik-patch-for-facebook-for-android/10151345597798920" target="_blank" rel="external">Facebook</a> has a solution for this. Also read this <a href="http://android-developers.blogspot.se/2011/07/custom-class-loading-in-dalvik.html" target="_blank" rel="external">link</a> for managing multiple dex files.</p>
 </blockquote>
-<p>答案中说可以使用Multidex解决，我在想我已经按照google文档multidex方法启动了multidex了啊？重新来看<a href="http://developer.android.com/tools/building/multidex.html" target="_blank" rel="external">Building Apps with Over 65K Methods</a>的multidex方法描述,写到：<br><blockquote><p>Applications that use multidex may not start on devices that run versions of the platform earlier than Android 4.0 (API level 14) due to a Dalvik linearAlloc bug (Issue 22586). If you are targeting API levels earlier than 14, make sure to perform testing with these versions of the platform as your application can have issues at startup or when particular groups of classes are loaded. Code shrinking can reduce or possibly eliminate these potential issues.  </p>
+<p>答案中说可以使用Multidex解决，我在想我已经按照google文档multidex方法启动了multidex了啊？但此时我们使用的g5，要重新来看待multidex以及它在低端机上可能产生的问题，再来看<a href="http://developer.android.com/tools/building/multidex.html" target="_blank" rel="external">Building Apps with Over 65K Methods</a>的multidex方法描述：<br><blockquote><p>Applications that use multidex may not start on devices that run versions of the platform earlier than Android 4.0 (API level 14) due to a Dalvik linearAlloc bug (Issue 22586). If you are targeting API levels earlier than 14, make sure to perform testing with these versions of the platform as your application can have issues at startup or when particular groups of classes are loaded. Code shrinking can reduce or possibly eliminate these potential issues.  </p>
 <p>Applications using a multidex configuration that make very large memory allocation requests may crash during run time due to a Dalvik linearAlloc limit (Issue 78035). The allocation limit was increased in Android 4.0 (API level 14), but apps may still run into this limit on Android versions prior to Android 5.0 (API level 21).</p>
 </blockquote></p>
 <p><strong>So, the problem is Allocation Limit In old android version!</strong>，android5.0提升了很多，而g5的2.3version很小。因此解释虽然使用multidex可以在小米上跑成功而g5则不可以。</p>
@@ -115,7 +114,7 @@
 <footer><strong>預防 Android Dex 64k Method Size Limit</strong><cite><a href="https://ingramchen.io/blog/2014/09/prevention-of-android-dex-64k-method-size-limit.html" target="_blank" rel="external">ingramchen.io/blog/2014/09/prevention-of-android-dex-64k-method-size-limit.html</a></cite></footer></blockquote>
 <blockquote><p>apk是一个zip压缩包，dalvik每次加载apk都要从中解压出class.dex文件，加载过程还涉及到dex的classes需要的杂七杂八的依赖库的加载，真耗时间。于是Android决定优化一下这个问题，在app安装到手机之后，系统运行dexopt程序对dex进行优化，将dex的依赖库文件和一些辅助数据打包成odex文件。存放在cache/dalvik_cache目录下。保存格式为apk路径 @ apk名 @ classes.dex。这样以空间换时间大大缩短读取/加载dex文件的过程。<br>那刚才那个bug是啥问题呢，原来dexopt程序的dalvik分配一块内存来统计你的app的dex里面的classes的信息，由于classes太多方法太多超过这个linearAlloc 的限制</p>
 <footer><strong>其实你不知道MultiDex到底有多坑</strong><cite><a href="http://zongwu233.github.io/the-touble-of-multidex/" target="_blank" rel="external">zongwu233.github.io/the-touble-of-multidex</a></cite></footer></blockquote>
-<p>使用了multidex,产生了多个dex,然而可能某个dex仍然会过大，<em>这个分dex的策略毕竟我们没有参与</em> ，而为了载入这个dex的class信息分配的内存有一个最大的限制。<a href="https://www.facebook.com/notes/facebook-engineering/under-the-hood-dalvik-patch-for-facebook-for-android/10151345597798920" target="_blank" rel="external">Under the Hood: Dalvik patch for Facebook for Android</a>这篇文章被引用，被解释说fb写了方案覆盖了这个容量限制，解决该问题。</p>
+<p>虽然使用了multidex,产生了多个dex,然而可能某个dex仍然会过大，而为了载入这个dex的class信息分配的内存有一个最大的限制。<a href="https://www.facebook.com/notes/facebook-engineering/under-the-hood-dalvik-patch-for-facebook-for-android/10151345597798920" target="_blank" rel="external">Under the Hood: Dalvik patch for Facebook for Android</a>这篇文章被引用，被解释说fb写了方案覆盖了这个容量限制，解决该问题。</p>
 <p>民间出高人，除了fb的方法,还有探究这一问题的文章<a href="http://www.birbit.com/how-to-solve-linearalloc-problem/" target="_blank" rel="external">How to Solve LinearAlloc Problem</a>，以及后来我搜中文找到的<a href="http://zongwu233.github.io/the-touble-of-multidex/" target="_blank" rel="external">其实你不知道MultiDex到底有多坑</a>，总结了许多,这标题真的不是为我量身定做的吗(ಥ _ ಥ)，这篇文章解释清楚了我对于method limit 和 linearAlloc的另一些困惑。同时也在解决问题的过程中挖的非常深，包括其中的几篇引用。。。ok,ok, let’s have a break，[姚明脸]。</p>
 <h3 id="Let_u2019s_try_Proguard_21"><a href="#Let_u2019s_try_Proguard_21" class="headerlink" title="Let’s try Proguard!"></a>Let’s try Proguard!</h3><p>也就是说，虽然我之前使用multidex来解决的scala库的methods limit问题，现在我重新使用proguard来解决所有因为依赖库(包括scala、akka)太大引起的问题。<strong>这里的问题包括methods limit和allocation limit</strong></p>
 <p>上面SO答主说明的他采取的并最终解决了linearAlloc问题的方法，我之所以觉得他更有可能解决这个问题是因为<br>我觉得proguard方法的原理是最直接解决g5上跑较大规模依赖库app的问题，因为它十分具体的减少了构建过程的class的量，这样有效的避免了DEX 64K Methods Limit,同时也使得LinearAlloc Problem不需要考虑，事实上，在使用Multidex解决DEX 64K Methods Limit的时候，官方文档甚至提出在某些低端机上要使用proguard做配合。然而每个不同的依赖都有不同的rules，我必须找到这样一份akka rules。</p>
