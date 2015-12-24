@@ -117,7 +117,7 @@
     <link href="http://potatoker.github.io/2015/12/23/scala-on-android/"/>
     <id>http://potatoker.github.io/2015/12/23/scala-on-android/</id>
     <published>2015-12-23T07:11:30.000Z</published>
-    <updated>2015-12-24T22:09:46.886Z</updated>
+    <updated>2015-12-24T22:11:15.058Z</updated>
     <content type="html"><![CDATA[<p>今天大概要宣布第一条路走不通了。</p>
 <p>感觉还是有必要把这条路重新理一下。。。毕竟并不是什么效果都没有看到。</p>
 <p>任务：在安卓手机上实现akka remote，我也不知道做这件事情到底有什么意义= =</p>
@@ -169,7 +169,13 @@ You may try using --multi-dex option.
 </blockquote>
 <p><img src="https://camo.githubusercontent.com/72417659473b911df7f1bd03359de67685783ae7/687474703a2f2f6f2d6e322e636f6d2f766572626f736553696d706c652e706e67" alt=""></p>
 <p>如上图所示， 确实，即使利用scala多范式语言的特性，就可以对比java写出同样功能但清爽许多的code。但是使用scala无法忽视的一点是，加入了scala语言库这个容量巨大的依赖(或者是因为太复杂的类继承关系)<a href="https://code.google.com/p/android/issues/detail?id=22586" target="_blank" rel="external">issue 22586</a>中讨论的就是sacala引起的LinearAlloc exceeded问题。<br><blockquote><p>由於 Android dex 的種種限制，造成 method 數量有上限的問題，再加上第三方 library 揮霍無度，使得即使你的 App 還很小，卻不小心會撞上這個 64k method 數限制。建議：</p>
-<p>慎選第三方 library，最好採用前先用 dex-method-count 度量一下<br>scala, groovy 這類非原生的開發語言想都不要想，它們只會帶來更多的問題。用非 Java 語言開發可以，但是僅限於 NDK<br>要替 Google play service 瘦身<br>square 出品的 library 都很適合 Android 使用<br>Android 2.3 的可用 method 數更少，約 56000，不過這只要 proguard 後達成即可。</p>
+<ol>
+<li>慎選第三方 library，最好採用前先用 dex-method-count 度量一下</li>
+<li>scala, groovy 這類非原生的開發語言想都不要想，它們只會帶來更多的問題。用非 Java 語言開發可以，但是僅限於 NDK</li>
+<li>要替 Google play service 瘦身</li>
+<li>square 出品的 library 都很適合 Android 使用</li>
+<li>Android 2.3 的可用 method 數更少，約 56000，不過這只要 proguard 後達成即可。</li>
+</ol>
 <footer><strong>預防 Android Dex 64k Method Size Limit</strong><cite><a href="https://ingramchen.io/blog/2014/09/prevention-of-android-dex-64k-method-size-limit.html" target="_blank" rel="external">ingramchen.io/blog/2014/09/prevention-of-android-dex-64k-method-size-limit.html</a></cite></footer></blockquote><br>如果你只是想要用android5.0 以上的device玩玩scala，大概都不会出现问题，但是，用这个写app的话，没办法保证会在什么样的千奇百怪的android device上出现问题。</p>
 ]]></content>
     <summary type="html">
