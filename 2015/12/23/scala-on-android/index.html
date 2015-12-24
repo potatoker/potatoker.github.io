@@ -28,7 +28,7 @@
 
 恩，先压抑住吐槽">
 <meta property="og:image" content="https://camo.githubusercontent.com/72417659473b911df7f1bd03359de67685783ae7/687474703a2f2f6f2d6e322e636f6d2f766572626f736553696d706c652e706e67">
-<meta property="og:updated_time" content="2015-12-24T18:05:05.403Z">
+<meta property="og:updated_time" content="2015-12-24T22:07:57.650Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="scala on android">
 <meta name="twitter:description" content="今天大概要宣布第一条路走不通了。
@@ -119,7 +119,7 @@ Unable to execute dex: method ID not in [0, 0xffff]: 65536
 Too many field references: 131000; max is 65536.
 You may try using --multi-dex option.
 </code></pre></blockquote>
-<p>其实这个问题在解决scala库依赖的时候根本不需要我操心。。因为我只用在作者已经配置好的<a href="https://github.com/saturday06/gradle-android-scala-plugin/tree/master/sample/simple" target="_blank" rel="external">sample</a>上继续写程序就可以了。但是我在akka库依赖的处理上这个问题并没有结束。</p>
+<p>其实这个问题在解决scala库依赖的时候根本不需要我操心。。因为我只用在作者已经配置好的<a href="https://github.com/saturday06/gradle-android-scala-plugin/tree/master/sample/simple" target="_blank" rel="external">sample</a>上继续写程序就可以了。</p>
 <h3 id="1-_use_proguard"><a href="#1-_use_proguard" class="headerlink" title="1. use proguard."></a>1. use proguard.</h3><p>android devloper上有简单地概念介绍：</p>
 <blockquote><p>The ProGuard tool shrinks, optimizes, and obfuscates your code by removing unused code and renaming classes, fields, and methods with semantically obscure names. The result is a smaller sized .apk file that is more difficult to reverse engineer.</p>
 <footer><strong>ProGuard</strong><cite><a href="http://developer.android.com/tools/help/proguard.html" target="_blank" rel="external">developer.android.com/tools/help/proguard.html</a></cite></footer></blockquote>
@@ -131,10 +131,10 @@ You may try using --multi-dex option.
 <p>Android 5.0 and higher uses a runtime called ART which natively supports loading multiple dex files from application APK files.</p>
 </blockquote></p>
 <p>其实主要是在gradle的build文件中添加multidex方法的依赖库，然后修改一些关联的配置<br><figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">dependencies</span> &#123;</span><br><span class="line">  <span class="keyword">compile</span> <span class="string">'com.android.support:multidex:1.0.0'</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>  </p>
-<p>详细的内容太仍然在<a href="https://developer.android.com/tools/building/multidex.html#mdex-gradle" target="_blank" rel="external">Configuring Your App for Multidex with Gradle</a>  </p>
+<p>详细的内容太仍然在<a href="https://developer.android.com/tools/building/multidex.html#mdex-gradle" target="_blank" rel="external">Configuring Your App for Multidex with Gradle</a> 。</p>
+<p>这里有非常重要的一点是multidex方法不能直接适用于低端机，我使用的是android 5.0device，在akka-on-andorid中我使用了multidex试图解决大型库依赖的问题，但会产生另外的问题。但是Android 2.3.7使用proguard之后是可以跑这个scala库的。</p>
 <p>题外话：</p>
 <p>想起毕设的时候就用到过dex，不过仍然是懵懵懂懂，又是kd移动分布式任务处理。。。通过用sdk tool可以把jar转换成dex, 这样一个dex就是分块任务，从而方便任务的分发与调用。看到Multidex lib的机制就想到了这么一件事。</p>
-<p>关于低端机，即使使用Multidex方法，仍然可能出现linearAlloc错误。这里暂不作讨论。我目前使用的机器是mi2 android5.0.  </p>
 <h3 id="in_the_end"><a href="#in_the_end" class="headerlink" title="in the end"></a>in the end</h3><p>总结一下，在android上使用scala:</p>
 <ol>
 <li><p>根据IDE下载scala语言的parse插件，我在android studio中使用的是<a href="http://www.jetbrains.net/confluence/display/SCA/Scala+Plugin+for+IntelliJ+IDEA" target="_blank" rel="external">这款</a>。这样IDE可以识别scala.</p>
@@ -147,7 +147,9 @@ You may try using --multi-dex option.
 <blockquote><p>Scaloid is a library that simplifies your Android code.<br>It makes your code easy to understand and maintain by leveraging Scala language.</p>
 </blockquote>
 <p><img src="https://camo.githubusercontent.com/72417659473b911df7f1bd03359de67685783ae7/687474703a2f2f6f2d6e322e636f6d2f766572626f736553696d706c652e706e67" alt=""></p>
-<p>如上图所示,总体感觉用scala写android还是蛮爽的（不过不敢直接写app），特别是最近写的看的都是python，看scala会顺眼许多。其实即使不使用这种构建方式，仅仅利用scala多范式语言的特性，也可以写出足够清爽的android app。</p>
+<p>如上图所示， 确实，即使利用scala多范式语言的特性，就可以对比java写出同样功能但清爽许多的code。但是使用scala无法忽视的一点是，加入了scala语言库这个容量巨大的依赖(或者是因为太复杂的类继承关系)<a href="https://code.google.com/p/android/issues/detail?id=22586" target="_blank" rel="external">issue 22586</a>中讨论的就是sacala引起的LinearAlloc exceeded问题。</p>
+<p>由於 Android dex 的種種限制，造成 method 數量有上限的問題，再加上第三方 library 揮霍無度，使得即使你的 App 還很小，卻不小心會撞上這個 64k method 數限制。建議：<br><blockquote><p>慎選第三方 library，最好採用前先用 dex-method-count 度量一下<br>scala, groovy 這類非原生的開發語言想都不要想，它們只會帶來更多的問題。用非 Java 語言開發可以，但是僅限於 NDK<br>要替 Google play service 瘦身<br>square 出品的 library 都很適合 Android 使用<br>Android 2.3 的可用 method 數更少，約 56000，不過這只要 proguard 後達成即可。</p>
+<footer><strong>預防 Android Dex 64k Method Size Limit</strong><cite><a href="https://ingramchen.io/blog/2014/09/prevention-of-android-dex-64k-method-size-limit.html" target="_blank" rel="external">ingramchen.io/blog/2014/09/prevention-of-android-dex-64k-method-size-limit.html</a></cite></footer></blockquote><br>如果你只是想要用android5.0 以上的device玩玩scala，大概都不会出现问题，但是，用这个写app的话，没办法保证会在什么样的千奇百怪的android device上出现问题。</p>
 
     
 	</div>

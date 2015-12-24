@@ -11,7 +11,7 @@
 <meta property="og:url" content="http://potatoker.github.io/2015/12/24/akka-on-android/index.html">
 <meta property="og:site_name" content="RRRay">
 <meta property="og:description" content="scala环境没问题了，接下来就是加入akka。其实真正麻烦的在akka的库调用上。。特别是proguard rule的debug简直是摸瞎。(ಥ _ ಥ)">
-<meta property="og:updated_time" content="2015-12-24T19:51:48.054Z">
+<meta property="og:updated_time" content="2015-12-24T21:47:11.120Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="akka-on-android">
 <meta name="twitter:description" content="scala环境没问题了，接下来就是加入akka。其实真正麻烦的在akka的库调用上。。特别是proguard rule的debug简直是摸瞎。(ಥ _ ಥ)">
@@ -95,7 +95,7 @@
 <figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">android</span> &#123;  </span><br><span class="line">    <span class="title">packagingOptions</span> &#123;    </span><br><span class="line">        <span class="title">pickFirst</span> <span class="string">'reference.conf'</span>  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>于是就这样解决了这一问题。也是google了好久，当时看到这个<a href="(https://code.google.com/p/android/issues/detail?id=61573">issue</a>的时候，楼已经盖得老高了，很多描述也不是很详细， 看了好久才总结出了这个解决办法。<br>其实这个问题解决了之后，我的akka就这样真的在我的小米上跑起来了。成功使一台android 5.0设备作为一台slave完成了一项并行处理任务。</p>
 <p>本该一切就这样结束了(ಥ _ ಥ)。</p>
-<h2 id="2-_g5_problem"><a href="#2-_g5_problem" class="headerlink" title="2. g5 problem"></a>2. g5 problem</h2><p>然而，并没有什么*用，因为某原因，我仍然需要在使得该程序在g5(api 10,version 2.3.7)上跑起来。</p>
+<h2 id="2-_LinearAlloc_5MB_capacity"><a href="#2-_LinearAlloc_5MB_capacity" class="headerlink" title="2. LinearAlloc 5MB capacity"></a>2. LinearAlloc 5MB capacity</h2><p>然而，并没有什么*用，因为某原因，我仍然需要在使得该程序在g5(api 10,version 2.3.7)上跑起来。</p>
 <p>果然，傲娇的g5没有跑通：</p>
 <p>我出现了类似这个<a href="http://stackoverflow.com/questions/23438213/package-has-mismatched-uid-10124-on-disk-10134-in-settings" target="_blank" rel="external">SO</a>上的问题：</p>
 <pre><code>Package has mismatched uid: 10124 on disk, 10134 in settings
@@ -109,8 +109,10 @@
 <p>答案中说可以使用Multidex解决，我在想我已经按照google文档multidex方法启动了multidex了啊？重新来看<a href="http://developer.android.com/tools/building/multidex.html" target="_blank" rel="external">Building Apps with Over 65K Methods</a>的multidex方法描述,写到：<br><blockquote><p>Applications that use multidex may not start on devices that run versions of the platform earlier than Android 4.0 (API level 14) due to a Dalvik linearAlloc bug (Issue 22586). If you are targeting API levels earlier than 14, make sure to perform testing with these versions of the platform as your application can have issues at startup or when particular groups of classes are loaded. Code shrinking can reduce or possibly eliminate these potential issues.  </p>
 <p>Applications using a multidex configuration that make very large memory allocation requests may crash during run time due to a Dalvik linearAlloc limit (Issue 78035). The allocation limit was increased in Android 4.0 (API level 14), but apps may still run into this limit on Android versions prior to Android 5.0 (API level 21).</p>
 </blockquote></p>
-<p>这个问题其实是许多需要大型依赖库app会遇到的继method limit之后的第二个问题<a href="https://code.google.com/p/android/issues/detail?id=22586" target="_blank" rel="external">Issue 22586</a>,后文中简称为allocation limit。</p>
-<p><strong>So, the real problem is Allocation Limit In old android version!</strong>，android5.0提升了很多，而g5的2.3version很小。因此解释虽然使用multidex可以在小米上跑成功而g5则不可以。</p>
+<p><strong>So, the problem is Allocation Limit In old android version!</strong>，android5.0提升了很多，而g5的2.3version很小。因此解释虽然使用multidex可以在小米上跑成功而g5则不可以。</p>
+<p>这个问题其实是许多需要大型依赖库app运行在某些低端机上会遇到的继method limit之后的第二个问题<a href="https://code.google.com/p/android/issues/detail?id=22586" target="_blank" rel="external">Issue 22586</a>,后文中简称为allocation limit。想要加入类似akka的大型库依赖，就必须解决这两个问题，关于这两个问题，<a href="https://ingramchen.io/blog/2014/09/prevention-of-android-dex-64k-method-size-limit.html" target="_blank" rel="external">这篇文章</a>有很好的解释分析</p>
+<blockquote><p>安裝 apk 時，如果出現上面提到的兩種錯誤，你通常會看到錯誤訊息有 INSTALL_FAILED_DEXOPT 這行。dexopt 是 dex optimization 的意思，這一步驟會發生在安裝完 apk 之後，它會檢驗 .dex 裡面的指令集是不是合法，也會驗 method 的上限數。超過上限的話，app 還沒啟動就被這一步擋下，直接噴錯。dexopt 也會試著將所有 class/method 都讀進 VM 驗證，這自然會運用到 LinearAlloc buffer。如果 buffer 不夠也是直接噴了。所以程式太大的話，通通會死在 dexopt 這過程裡。</p>
+<footer><strong>預防 Android Dex 64k Method Size Limit</strong><cite><a href="https://ingramchen.io/blog/2014/09/prevention-of-android-dex-64k-method-size-limit.html" target="_blank" rel="external">ingramchen.io/blog/2014/09/prevention-of-android-dex-64k-method-size-limit.html</a></cite></footer></blockquote>
 <blockquote><p>apk是一个zip压缩包，dalvik每次加载apk都要从中解压出class.dex文件，加载过程还涉及到dex的classes需要的杂七杂八的依赖库的加载，真耗时间。于是Android决定优化一下这个问题，在app安装到手机之后，系统运行dexopt程序对dex进行优化，将dex的依赖库文件和一些辅助数据打包成odex文件。存放在cache/dalvik_cache目录下。保存格式为apk路径 @ apk名 @ classes.dex。这样以空间换时间大大缩短读取/加载dex文件的过程。<br>那刚才那个bug是啥问题呢，原来dexopt程序的dalvik分配一块内存来统计你的app的dex里面的classes的信息，由于classes太多方法太多超过这个linearAlloc 的限制</p>
 <footer><strong>其实你不知道MultiDex到底有多坑</strong><cite><a href="http://zongwu233.github.io/the-touble-of-multidex/" target="_blank" rel="external">zongwu233.github.io/the-touble-of-multidex</a></cite></footer></blockquote>
 <p>使用了multidex,产生了多个dex,然而可能某个dex仍然会过大，<em>这个分dex的策略毕竟我们没有参与</em> ，而为了载入这个dex的class信息分配的内存有一个最大的限制。<a href="https://www.facebook.com/notes/facebook-engineering/under-the-hood-dalvik-patch-for-facebook-for-android/10151345597798920" target="_blank" rel="external">Under the Hood: Dalvik patch for Facebook for Android</a>这篇文章被引用，被解释说fb写了方案覆盖了这个容量限制，解决该问题。</p>
