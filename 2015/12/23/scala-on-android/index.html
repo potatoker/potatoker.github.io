@@ -28,7 +28,7 @@
 
 恩，先压抑住吐槽">
 <meta property="og:image" content="https://camo.githubusercontent.com/72417659473b911df7f1bd03359de67685783ae7/687474703a2f2f6f2d6e322e636f6d2f766572626f736553696d706c652e706e67">
-<meta property="og:updated_time" content="2015-12-24T00:20:54.160Z">
+<meta property="og:updated_time" content="2015-12-24T18:05:05.403Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="scala on android">
 <meta name="twitter:description" content="今天大概要宣布第一条路走不通了。
@@ -134,6 +134,7 @@ You may try using --multi-dex option.
 <p>详细的内容太仍然在<a href="https://developer.android.com/tools/building/multidex.html#mdex-gradle" target="_blank" rel="external">Configuring Your App for Multidex with Gradle</a>  </p>
 <p>题外话：</p>
 <p>想起毕设的时候就用到过dex，不过仍然是懵懵懂懂，又是kd移动分布式任务处理。。。通过用sdk tool可以把jar转换成dex, 这样一个dex就是分块任务，从而方便任务的分发与调用。看到Multidex lib的机制就想到了这么一件事。</p>
+<p>关于低端机，即使使用Multidex方法，仍然可能出现linearAlloc错误。这里暂不作讨论。我目前使用的机器是mi2 android5.0.  </p>
 <h3 id="in_the_end"><a href="#in_the_end" class="headerlink" title="in the end"></a>in the end</h3><p>总结一下，在android上使用scala:</p>
 <ol>
 <li><p>根据IDE下载scala语言的parse插件，我在android studio中使用的是<a href="http://www.jetbrains.net/confluence/display/SCA/Scala+Plugin+for+IntelliJ+IDEA" target="_blank" rel="external">这款</a>。这样IDE可以识别scala.</p>
