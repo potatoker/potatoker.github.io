@@ -27,7 +27,8 @@
 丧心病狂的来了，由于某种更加扭曲的实验方式的限制，最终实验必须要在一台g5上跑起来。
 
 恩，先压抑住吐槽">
-<meta property="og:updated_time" content="2015-12-23T17:46:41.945Z">
+<meta property="og:image" content="https://camo.githubusercontent.com/72417659473b911df7f1bd03359de67685783ae7/687474703a2f2f6f2d6e322e636f6d2f766572626f736553696d706c652e706e67">
+<meta property="og:updated_time" content="2015-12-24T00:20:54.160Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="scala on android">
 <meta name="twitter:description" content="今天大概要宣布第一条路走不通了。
@@ -107,7 +108,7 @@
 <h1 id="scala_on_android"><a href="#scala_on_android" class="headerlink" title="scala on android"></a>scala on android</h1><p> 经过搜索之后，发现在安卓平台上跑scala并不是什么新鲜事了，scala作为一门基于java虚拟机的语言，同样第一步需要预编译成class文件，然后打包成apk安装到android上，原理上是完全没有问题的。</p>
 <p>不过当时遇到的问题是，一般scala使用的build tool 是sbt，而我目前使用的IDE android studio使用的是gradle. 这样记得当时google出来的scala on android的一些插件或者套路基本根据这两种build tool来的。我也不知道该使用哪一种，因为实际上两种我都并没有很了解，似乎走了不少弯路。  </p>
 <p>不过最终，让我跑通的是：<a href="https://github.com/saturday06/gradle-android-scala-plugin" target="_blank" rel="external">基于gradle的</a>，毕竟这是android studio自带的build tool, 配置起来可能会方便一点。</p>
-<p>不过当时遇到一个比较头疼的问题是<a href="https://developer.android.com/tools/building/multidex.html" target="_blank" rel="external">DEX 64K Methods Limit</a>.当依赖的库太多的时候，毕竟这些Jar包都要被一起build成一个dex文件，而默认一个apk只包含一个dex文件。 android的build机制对这样的一个库的容量有所限制.：</p>
+<p>这里遇到一个问题是<a href="https://developer.android.com/tools/building/multidex.html" target="_blank" rel="external">DEX 64K Methods Limit</a>.当依赖的库太多的时候(这个scala语言库本身还是比较大)，毕竟这些Jar包都要被一起build成一个dex文件，而默认一个apk只包含一个dex文件。 android的build机制对这样的一个库的容量有所限制.：</p>
 <blockquote><p>As the Android platform has continued to grow, so has the size of Android apps. When your application and the libraries it references reach a certain size, you encounter build errors that indicate your app has reached a limit of the Android app build architecture. Earlier versions of the build system report this error as follows:</p>
 <pre><code>Conversion to Dalvik format failed:
 Unable to execute dex: method ID not in [0, 0xffff]: 65536
@@ -116,28 +117,34 @@ Unable to execute dex: method ID not in [0, 0xffff]: 65536
 Too many field references: 131000; max is 65536.
 You may try using --multi-dex option.
 </code></pre></blockquote>
-<p>其实这个问题在解决scala库依赖的时候根本不需要我操心。。因为我只用在作者已经配置好的<a href="https://github.com/saturday06/gradle-android-scala-plugin/tree/master/sample/simple" target="_blank" rel="external">sample</a>上继续写程序就可以了。当时还牛角尖研究这个问题研究了好久。</p>
-<p>所以还是勉强总结一下吧。。</p>
+<p>其实这个问题在解决scala库依赖的时候根本不需要我操心。。因为我只用在作者已经配置好的<a href="https://github.com/saturday06/gradle-android-scala-plugin/tree/master/sample/simple" target="_blank" rel="external">sample</a>上继续写程序就可以了。但是我在akka库依赖的处理上这个问题并没有结束。</p>
 <h3 id="1-_use_proguard"><a href="#1-_use_proguard" class="headerlink" title="1. use proguard."></a>1. use proguard.</h3><p>android devloper上有简单地概念介绍：</p>
 <blockquote><p>The ProGuard tool shrinks, optimizes, and obfuscates your code by removing unused code and renaming classes, fields, and methods with semantically obscure names. The result is a smaller sized .apk file that is more difficult to reverse engineer.</p>
 <footer><strong>ProGuard</strong><cite><a href="http://developer.android.com/tools/help/proguard.html" target="_blank" rel="external">developer.android.com/tools/help/proguard.html</a></cite></footer></blockquote>
-<p>这东西有两个作用，一个是减小apk的大小，一个是对方法名进行混淆。我需要用到他的第一个作用，思路就是引用的库中，很多方法其实根本用不到，所以proguard就会帮助build tool把引用到的那一部分加入编译，这样就不会使dex文件过大。那么他是怎么判断哪些方法该被加入编译，哪些是没用的呢，这东西还没有那么智能。。需要一份rules来规定哪些方法和类是需要保存的，虽然sdk tool自带一份默认的rules，但是！一般情况还是需要debug一下，然后手动修改rules文件。如果是第三方的jar包，那就更没得跑了。<br>但是这个东西当我第一次看到他的使用<a href="https://stuff.mit.edu/afs/sipb/project/android/sdk/android-sdk-linux/tools/proguard/docs/index.html#manual/introduction.html" target="_blank" rel="external">文档</a>的时候，就方了，这种朴素的markdown风格加上瀑布一般的排版。。。看不下去。。。总之原理基本上是，根据控制台输出的错误信息，一般是，方法或者类丢失，说明proguard丢弃了这个方法或类，那么在rule文件里把有完全限定名的类使用keep语句手动保留，就可以了。比较典型的有下面两种：  </p>
-<pre><code>如果Build过程提示classNotFound或者methodNotFound就直接keep 
-</code></pre><figure class="highlight xquery"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-keep class akka.actor.LocalActorRefProvider<span class="variable">$Guardian</span>&#123;</span><br><span class="line">  *;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>如果告诉你类似<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java.lang.RuntimeException: Unable to <span class="operator"><span class="keyword">start</span> activity ComponentInfo&#123;com.myapp/com.myapp.MyActivity&#125;: <span class="keyword">java</span>.lang.NoSuchMethodException: &lt;init&gt; [<span class="keyword">interface</span> com.typesafe.config.Config, <span class="keyword">interface</span> akka.<span class="keyword">event</span>.LoggingAdapter, <span class="keyword">interface</span> <span class="keyword">java</span>.util.<span class="keyword">concurrent</span>.ThreadFactory]</span></span><br></pre></td></tr></table></figure></p>
-<p>则用：<br><figure class="highlight haml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-<span class="ruby">keepclasseswithmembers <span class="class"><span class="keyword">class</span> * &#123;</span></span><br><span class="line"></span>    public &lt;init&gt;(com.typesafe.config.Config, akka.event.LoggingAdapter, java.util.concurrent.ThreadFactory);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>  </p>
-<p>这两招屡试不爽。。虽然proguard还有许多其他keep方式。。。但实在不想去看瀑布了。。</p>
-<p>其实在使用scala lib的时候并不需要这一步，因为之前提到过，直接使用作者已经配置好的sample就可以了。事实上关于proguard，我看到过这么一段话：</p>
-<blockquote><p>Many problems with ProGuard stem from the inclusion of third-party libraries in your project.<br>the first step in avoiding such errors is to consult the documentation of each third-party library and follow any instructions for deployment with ProGuard.<br>If the documentation mentions nothing about ProGuard, but the library is open source, then there is no point to obfuscating its code from a security standpoint anyway.</p>
-<footer><strong>A Conservative Guide to ProGuard for Android</strong><cite><a href="http://omgitsmgp.com/2013/09/09/a-conservative-guide-to-proguard-for-android/" target="_blank" rel="external">omgitsmgp.com/2013/09/09/a-conservative-guide-to-proguard-for-android</a></cite></footer></blockquote>
-<p>很遗憾。。akka似乎并没有提供这样一份东西。。</p>
-<h3 id="2-_Use_MultiDex"><a href="#2-_Use_MultiDex" class="headerlink" title="2. Use MultiDex"></a>2. Use MultiDex</h3><p>事实上我使用的作者的sample 并没有使用proguard方法，而是使用 multidex。<br>解决思路就是，以前一个apk只有一个dex包，dex又有大小限制，那么我就吧class分成两个dex打包，使用不同dex中的class的时候采取某种调用机制。这样就不会超过这个限制。</p>
+<p>这东西有两个作用，一个是减小apk的大小，一个是对方法名进行混淆。我需要用到他的第一个作用，思路就是引用的库中，很多方法其实根本用不到，所以proguard就会帮助build tool把引用到的那一部分加入编译，这样就不会使dex文件过大。那么他是怎么判断哪些方法该被加入编译，哪些是没用的呢，这东西还没有那么智能。。需要一份rules来规定哪些方法和类是需要保存的，虽然sdk tool自带一份默认的rules，但是！一般情况还是需要debug一下，然后手动修改rules文件。如果是第三方的jar包，那就更没得跑了。</p>
+<p>其实在使用scala lib的时候并不需要这一步，因为之前提到过，直接使用作者已经配置好的<a href="https://github.com/saturday06/gradle-android-scala-plugin/tree/master/sample/simple" target="_blank" rel="external">sample</a>就可以了，不过这个sample使用的是第二种方法。但是如果想要使用progurad来解决这个问题也可以在网上找到现成的scala库的<a href="https://github.com/pocorall/hello-scaloid-gradle/blob/master/proguard-rules.txt" target="_blank" rel="external">proguard rule</a>,这个方法我也使用过，也可以成功跑通scala.</p>
+<p>scala这一块已经解决，然而。。akka似乎并没有提供这样一份东西。。详细的内容在后一篇。</p>
+<h3 id="2-_Use_MultiDex"><a href="#2-_Use_MultiDex" class="headerlink" title="2. Use MultiDex"></a>2. Use MultiDex</h3><p>事实上我使用的作者的sample 并没有使用proguard方法，而是使用 multidex。<br>解决思路就是，以前一个apk只有一个dex包，dex又有大小限制，那么我就吧class分成多个dex打包，使用不同dex中的class的时候采取某种调用机制。这样就不会超过这个限制。</p>
 <p>官方解释：<br><blockquote><p>Versions of the platform prior to Android 5.0 use the Dalvik runtime for executing app code. By default, Dalvik limits apps to a single classes.dex bytecode file per APK. In order to get around this limitation, you can use the multidex support library, which becomes part of the primary DEX file of your app and then manages access to the additional DEX files and the code they contain. </p>
 <p>Android 5.0 and higher uses a runtime called ART which natively supports loading multiple dex files from application APK files.</p>
 </blockquote></p>
+<p>其实主要是在gradle的build文件中添加multidex方法的依赖库，然后修改一些关联的配置<br><figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">dependencies</span> &#123;</span><br><span class="line">  <span class="keyword">compile</span> <span class="string">'com.android.support:multidex:1.0.0'</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>  </p>
+<p>详细的内容太仍然在<a href="https://developer.android.com/tools/building/multidex.html#mdex-gradle" target="_blank" rel="external">Configuring Your App for Multidex with Gradle</a>  </p>
 <p>题外话：</p>
 <p>想起毕设的时候就用到过dex，不过仍然是懵懵懂懂，又是kd移动分布式任务处理。。。通过用sdk tool可以把jar转换成dex, 这样一个dex就是分块任务，从而方便任务的分发与调用。看到Multidex lib的机制就想到了这么一件事。</p>
-<h3 id="in_the_end"><a href="#in_the_end" class="headerlink" title="in the end"></a>in the end</h3><p>其实上面说了这么多，一句话就是使用<a href="https://github.com/saturday06/gradle-android-scala-plugin" target="_blank" rel="external">该插件</a>,而且配置并不重要，在其sample的基础上使用scala即可。其实真正麻烦的在akka的库调用上。。特别是上述proguard rule的debug简直是摸瞎。(ಥ _ ಥ)</p>
+<h3 id="in_the_end"><a href="#in_the_end" class="headerlink" title="in the end"></a>in the end</h3><p>总结一下，在android上使用scala:</p>
+<ol>
+<li><p>根据IDE下载scala语言的parse插件，我在android studio中使用的是<a href="http://www.jetbrains.net/confluence/display/SCA/Scala+Plugin+for+IntelliJ+IDEA" target="_blank" rel="external">这款</a>。这样IDE可以识别scala.</p>
+</li>
+<li><p>使用这款支持scala编译的<a href="https://github.com/saturday06/gradle-android-scala-plugin" target="_blank" rel="external">插件</a>，并根据其read文件来解决可能遇到的<a href="https://developer.android.com/tools/building/multidex.html" target="_blank" rel="external">DEX 64K Methods Limit</a>问题。<br>有两个解决方法：如果使用multidex，参考<a href="https://developer.android.com/tools/building/multidex.html#mdex-gradle" target="_blank" rel="external">Configuring Your App for Multidex with Gradle</a>，步骤并不多。甚至你可以直接使用该<a href="https://github.com/saturday06/gradle-android-scala-plugin/tree/master/sample/simple" target="_blank" rel="external">sample</a>的build配置，在此基础上写程序即可；如果使用proguard，先上网搜索该库的proguard文件，常常会有人已经写出来了，这里<a href="https://github.com/pocorall/hello-scaloid-gradle/blob/master/proguard-rules.txt" target="_blank" rel="external">hello-scaloid-gradle</a>就做了提供。</p>
+</li>
+<li><p>使用scala来写android app~<br>可以使用一些框架，比如<a href="https://github.com/pocorall/scaloid" target="_blank" rel="external">scaloid</a></p>
+</li>
+</ol>
+<blockquote><p>Scaloid is a library that simplifies your Android code.<br>It makes your code easy to understand and maintain by leveraging Scala language.</p>
+</blockquote>
+<p><img src="https://camo.githubusercontent.com/72417659473b911df7f1bd03359de67685783ae7/687474703a2f2f6f2d6e322e636f6d2f766572626f736553696d706c652e706e67" alt=""></p>
+<p>如上图所示,总体感觉用scala写android还是蛮爽的（不过不敢直接写app），特别是最近写的看的都是python，看scala会顺眼许多。其实即使不使用这种构建方式，仅仅利用scala多范式语言的特性，也可以写出足够清爽的android app。</p>
 
     
 	</div>
@@ -161,11 +168,11 @@ You may try using --multi-dex option.
     
 <nav id="article-nav">
   
-    <a href="/2015/12/24/akka-on-android/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2015/12/24/dex-methods-limits/" id="article-nav-newer" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Newer</strong>
       <div class="article-nav-title">
         
-          akka-on-android
+          (no title)
         
       </div>
     </a>

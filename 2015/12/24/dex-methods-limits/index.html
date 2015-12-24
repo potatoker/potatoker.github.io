@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>RRRay</title>
+  <meta name="viewport" content="width=device-width">
+  <meta name="description" content="在实验akka on android的时候，这是我的依赖：
+123456dependencies &amp;#123;    compile &quot;org.scala-lang:scala-library:2.11.7&quot;	compile &quot;org.scaloid:scaloid_2.11:4.0&quot;    compile &apos;com.typesafe.akka:akka-actor_2.11:2.3.9&apos;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RRRay">
+<meta property="og:url" content="http://yoursite.com/2015/12/24/dex-methods-limits/index.html">
+<meta property="og:site_name" content="RRRay">
+<meta property="og:description" content="在实验akka on android的时候，这是我的依赖：
+123456dependencies &amp;#123;    compile &quot;org.scala-lang:scala-library:2.11.7&quot;	compile &quot;org.scaloid:scaloid_2.11:4.0&quot;    compile &apos;com.typesafe.akka:akka-actor_2.11:2.3.9&apos;">
+<meta property="og:updated_time" content="2015-12-23T23:56:19.368Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="RRRay">
+<meta name="twitter:description" content="在实验akka on android的时候，这是我的依赖：
+123456dependencies &amp;#123;    compile &quot;org.scala-lang:scala-library:2.11.7&quot;	compile &quot;org.scaloid:scaloid_2.11:4.0&quot;    compile &apos;com.typesafe.akka:akka-actor_2.11:2.3.9&apos;">
+  
+    <link rel="alternative" href="/atom.xml" title="RRRay" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/bitbug_favicon.ico">
+  
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+</head>
+<body>
+  <div id="container">
+    <div class="mobile-nav-panel">
+	<i class="icon-reorder icon-large"></i>
+</div>
+<header id="header">
+	<h1 class="blog-title">
+		<a href="/">RRRay</a>
+	</h1>
+	<nav class="nav">
+		<ul>
+			<li><a href="/">Home</a></li><li><a href="/archives">Archives</a></li>
+			<li><a id="nav-search-btn" class="nav-icon" title="Search"></a></li>
+			<li><a href="/atom.xml" id="nav-rss-link" class="nav-icon" title="RSS Feed"></a></li>
+		</ul>
+	</nav>
+	<div id="search-form-wrap">
+		<form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+	</div>
+</header>
+    <div id="main">
+      <article id="post-dex-methods-limits" class="post">
+	<footer class="entry-meta-header">
+		<span class="meta-elements date">
+			<a href="/2015/12/24/dex-methods-limits/" class="article-date">
+  <time datetime="2015-12-23T23:56:19.368Z" itemprop="datePublished">2015-12-24</time>
+</a>
+		</span>
+		<span class="meta-elements author">RRRay</span>
+		<div class="commentscount">
+			
+		</div>
+	</footer>
+	
+	<header class="entry-header">
+		
+	</header>
+	<div class="entry-content">
+		
+    	<p>在实验akka on android的时候，这是我的依赖：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">dependencies</span> &#123;</span><br><span class="line">    <span class="keyword">compile</span> <span class="string">"org.scala-lang:scala-library:2.11.7"</span></span><br><span class="line">	<span class="keyword">compile</span> <span class="string">"org.scaloid:scaloid_2.11:4.0"</span></span><br><span class="line">    <span class="keyword">compile</span> <span class="string">'com.typesafe.akka:akka-actor_2.11:2.3.9'</span></span><br><span class="line">    <span class="keyword">compile</span> <span class="string">'com.typesafe.akka:akka-remote_2.11:2.3.9'</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote><p>As the Android platform has continued to grow, so has the size of Android apps. When your application and the libraries it references reach a certain size, you encounter build errors that indicate your app has reached a limit of the Android app build architecture. Earlier versions of the build system report this error as follows:</p>
+<pre><code>Conversion to Dalvik format failed:
+Unable to execute dex: method ID not in [0, 0xffff]: 65536
+</code></pre><p>More recent versions of the Android build system display a different error, which is an indication of the same problem:</p>
+<pre><code>trouble writing output:
+Too many field references: 131000; max is 65536.
+You may try using --multi-dex option.
+</code></pre><footer><strong>Building Apps with Over 65K Methods</strong><cite><a href="https://developer.android.com/tools/building/multidex.html" target="_blank" rel="external">developer.android.com/tools/building/multidex.html</a></cite></footer></blockquote>
+    
+	</div>
+	<footer class="entry-footer">
+		<div class="entry-meta-footer">
+			<span class="category">
+				
+			</span>
+			<span class="tags">
+				
+			</span>
+		</div>
+	</footer>
+	
+    
+<nav id="article-nav">
+  
+    <a href="/2015/12/24/akka-on-android/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          akka-on-android
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2015/12/23/scala-on-android/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          scala on android
+        
+      </div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+
+
+    </div>
+    <div class="mb-search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:yoursite.com">
+  </form>
+</div>
+<footer id="footer">
+	<h1 class="footer-blog-title">
+		<a href="/">RRRay</a>
+	</h1>
+	<span class="copyright">
+		&copy; 2015 RRRay<br>
+		Modify from <a href="http://sanographix.github.io/tumblr/apollo/" target="_blank">Apollo</a> theme, designed by <a href="http://www.sanographix.net/" target="_blank">SANOGRAPHIX.NET</a><br>
+		Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+	</span>
+</footer>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js" type="text/javascript"></script>
+  </div>
+</body>
+</html>
