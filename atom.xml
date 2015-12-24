@@ -106,29 +106,6 @@
   </entry>
   
   <entry>
-    <title></title>
-    <link href="http://yoursite.com/2015/12/24/dex-methods-limits/"/>
-    <id>http://yoursite.com/2015/12/24/dex-methods-limits/</id>
-    <published>2015-12-23T23:56:19.368Z</published>
-    <updated>2015-12-23T23:56:19.368Z</updated>
-    <content type="html"><![CDATA[<p>在实验akka on android的时候，这是我的依赖：</p>
-<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">dependencies</span> &#123;</span><br><span class="line">    <span class="keyword">compile</span> <span class="string">"org.scala-lang:scala-library:2.11.7"</span></span><br><span class="line">	<span class="keyword">compile</span> <span class="string">"org.scaloid:scaloid_2.11:4.0"</span></span><br><span class="line">    <span class="keyword">compile</span> <span class="string">'com.typesafe.akka:akka-actor_2.11:2.3.9'</span></span><br><span class="line">    <span class="keyword">compile</span> <span class="string">'com.typesafe.akka:akka-remote_2.11:2.3.9'</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<blockquote><p>As the Android platform has continued to grow, so has the size of Android apps. When your application and the libraries it references reach a certain size, you encounter build errors that indicate your app has reached a limit of the Android app build architecture. Earlier versions of the build system report this error as follows:</p>
-<pre><code>Conversion to Dalvik format failed:
-Unable to execute dex: method ID not in [0, 0xffff]: 65536
-</code></pre><p>More recent versions of the Android build system display a different error, which is an indication of the same problem:</p>
-<pre><code>trouble writing output:
-Too many field references: 131000; max is 65536.
-You may try using --multi-dex option.
-</code></pre><footer><strong>Building Apps with Over 65K Methods</strong><cite><a href="https://developer.android.com/tools/building/multidex.html" target="_blank" rel="external">developer.android.com/tools/building/multidex.html</a></cite></footer></blockquote>]]></content>
-    <summary type="html">
-    <![CDATA[<p>在实验akka on android的时候，这是我的依赖：</p>
-<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><spa]]>
-    </summary>
-    
-  </entry>
-  
-  <entry>
     <title><![CDATA[scala on android]]></title>
     <link href="http://yoursite.com/2015/12/23/scala-on-android/"/>
     <id>http://yoursite.com/2015/12/23/scala-on-android/</id>

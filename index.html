@@ -104,55 +104,6 @@
 
 
   
-    <article id="post-dex-methods-limits" class="post">
-	<footer class="entry-meta-header">
-		<span class="meta-elements date">
-			<a href="/2015/12/24/dex-methods-limits/" class="article-date">
-  <time datetime="2015-12-23T23:56:19.368Z" itemprop="datePublished">2015-12-24</time>
-</a>
-		</span>
-		<span class="meta-elements author">RRRay</span>
-		<div class="commentscount">
-			
-		</div>
-	</footer>
-	
-	<header class="entry-header">
-		
-	</header>
-	<div class="entry-content">
-		
-    	<p>在实验akka on android的时候，这是我的依赖：</p>
-<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">dependencies</span> &#123;</span><br><span class="line">    <span class="keyword">compile</span> <span class="string">"org.scala-lang:scala-library:2.11.7"</span></span><br><span class="line">	<span class="keyword">compile</span> <span class="string">"org.scaloid:scaloid_2.11:4.0"</span></span><br><span class="line">    <span class="keyword">compile</span> <span class="string">'com.typesafe.akka:akka-actor_2.11:2.3.9'</span></span><br><span class="line">    <span class="keyword">compile</span> <span class="string">'com.typesafe.akka:akka-remote_2.11:2.3.9'</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<blockquote><p>As the Android platform has continued to grow, so has the size of Android apps. When your application and the libraries it references reach a certain size, you encounter build errors that indicate your app has reached a limit of the Android app build architecture. Earlier versions of the build system report this error as follows:</p>
-<pre><code>Conversion to Dalvik format failed:
-Unable to execute dex: method ID not in [0, 0xffff]: 65536
-</code></pre><p>More recent versions of the Android build system display a different error, which is an indication of the same problem:</p>
-<pre><code>trouble writing output:
-Too many field references: 131000; max is 65536.
-You may try using --multi-dex option.
-</code></pre><footer><strong>Building Apps with Over 65K Methods</strong><cite><a href="https://developer.android.com/tools/building/multidex.html" target="_blank" rel="external">developer.android.com/tools/building/multidex.html</a></cite></footer></blockquote>
-    
-	</div>
-	<footer class="entry-footer">
-		<div class="entry-meta-footer">
-			<span class="category">
-				
-			</span>
-			<span class="tags">
-				
-			</span>
-		</div>
-	</footer>
-	
-</article>
-
-
-	<hr class="article-devider">
-
-
-
-  
     <article id="post-scala-on-android" class="post">
 	<footer class="entry-meta-header">
 		<span class="meta-elements date">
@@ -314,6 +265,65 @@ You may try using --multi-dex option.
 			<span class="tags">
 				
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/crawler/">crawler</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/">python</a></li></ul>
+
+			</span>
+		</div>
+	</footer>
+	
+</article>
+
+
+	<hr class="article-devider">
+
+
+
+  
+    <article id="post-json使用总结" class="post">
+	<footer class="entry-meta-header">
+		<span class="meta-elements date">
+			<a href="/2015/12/20/json使用总结/" class="article-date">
+  <time datetime="2015-12-20T12:38:30.000Z" itemprop="datePublished">2015-12-20</time>
+</a>
+		</span>
+		<span class="meta-elements author">RRRay</span>
+		<div class="commentscount">
+			
+		</div>
+	</footer>
+	
+	<header class="entry-header">
+		
+  
+    <h1 itemprop="name" class="entry-title">
+      <a class="article-title" href="/2015/12/20/json使用总结/">json使用总结</a>
+    </h1>
+  
+
+	</header>
+	<div class="entry-content">
+		
+			<p>写爬虫的时候真的发现json很好用，作为一种序列化机制。。。恐怕没有更好理解的了。</p>
+<p>这里我的数据经历了：</p>
+<p><strong>网站–&gt;python爬虫–&gt;mysql数据库&lt;–&gt;php程序&lt;–&gt;java(安卓app)</strong></p>
+			
+				<p class="article-more-link">
+					<a href="/2015/12/20/json使用总结/#more">more</a>
+				</p>
+      
+    
+	</div>
+	<footer class="entry-footer">
+		<div class="entry-meta-footer">
+			<span class="category">
+				
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/general-tech/">general tech</a>
+  </div>
+
+			</span>
+			<span class="tags">
+				
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/">java</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/json/">json</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/php/">php</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/python/">python</a></li></ul>
 
 			</span>
 		</div>
