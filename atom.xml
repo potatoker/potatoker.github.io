@@ -4,7 +4,7 @@
   
   <link href="/atom.xml" rel="self"/>
   <link href="http://potatoker.github.io/"/>
-  <updated>2016-08-17T03:02:11.778Z</updated>
+  <updated>2016-08-17T04:10:39.355Z</updated>
   <id>http://potatoker.github.io/</id>
   
   <author>
@@ -15,11 +15,323 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title><![CDATA[浅析Binder机制]]></title>
+    <link href="http://potatoker.github.io/2016/08/17/Binder/"/>
+    <id>http://potatoker.github.io/2016/08/17/Binder/</id>
+    <published>2016-08-17T03:51:30.000Z</published>
+    <updated>2016-08-17T04:10:39.355Z</updated>
+    <content type="html"><![CDATA[<p>并没有找到讲binder机制特别清晰的中文资料</p>
+<p>终于在youtube上找到一个<a href="https://www.youtube.com/watch?v=Jgampt1DOak" target="_blank" rel="external">演讲</a>和<a href="http://events.linuxfoundation.org/images/stories/slides/abs2013_gargentas.pdf" target="_blank" rel="external">slides</a>,以及<a href="https://www.nds.rub.de/media/attachments/files/2012/03/binder.pdf" target="_blank" rel="external">这篇</a>资料作为补充，从更全面的角度介绍了更细致的前因后果的</p>
+<a id="more"></a>
+<p><img src="/images/Screen%20Shot%202016-07-24%20at%2010.20.14%20AM.png" alt=""></p>
+<p>首先看这张把最主要的几个部分显示出来的图，可以看到process A和B的通信稍显曲折，这也是看到其他博客整片”A调用B,B又调用C”的原因。</p>
+<p>这里还有一个类之间的调用关系抽象图，同样截取自上面的youtube presentation的slides。</p>
+<p><img src="/images/Screen%20Shot%202016-07-24%20at%2010.18.48%20AM.png" alt="Screen Shot 2016-07-24 at 10.18.48 A"></p>
+<p>这里首先有个基本的概念。进程间的通信，比如你在进程A 里面用service.invoke(func)，所谓IPC是真正的执行主体是在进程B，这里</p>
+<h2 id="u8FD9_u91CC_u5148_u8BF4_u4E00_u4E2A_u95EE_u9898_uFF0C_u4E3A_u4EC0_u4E48_u8981_u7528cs_u7ED3_u6784_uFF1F_u4E3A_u4EC0_u4E48_u8981_u7528IPC_u901A_u4FE1_3F"><a href="#u8FD9_u91CC_u5148_u8BF4_u4E00_u4E2A_u95EE_u9898_uFF0C_u4E3A_u4EC0_u4E48_u8981_u7528cs_u7ED3_u6784_uFF1F_u4E3A_u4EC0_u4E48_u8981_u7528IPC_u901A_u4FE1_3F" class="headerlink" title="这里先说一个问题，为什么要用cs结构？为什么要用IPC通信?"></a>这里先说一个问题，为什么要用cs结构？为什么要用IPC通信?</h2><p>其实在一个系统中client和server的概念还是挺明确的，用户程序常常要使用一些通用的系统服务，gps,alarm等等，这些肯定是安卓系统负责去维护的。包括开一个activity，task栈是可以跨进程的，维护这个栈肯定也是系统去维护。</p>
+<p>既然这么多需要系统去同意维护的服务，那么就采用c/s结构，上面的各个client都可以向系统请求这些服务，系统也方便管理。</p>
+<p>显然，系统服务和用户进程是两个进程，他们之间的通信是IPC。</p>
+<h2 id="u4E00_u76F4_u5728_u8BF4_u7684binder_u5230_u5E95_u662F_u4E2A_u4EC0_u4E48_u4E1C_u897F"><a href="#u4E00_u76F4_u5728_u8BF4_u7684binder_u5230_u5E95_u662F_u4E2A_u4EC0_u4E48_u4E1C_u897F" class="headerlink" title="一直在说的binder到底是个什么东西"></a>一直在说的binder到底是个什么东西</h2><p>一般Binder，就是指binder机制，在一些描述中，有的会说把这个binder传给谁。不过在上面两篇里面基本很少这么使用。</p>
+<p>先看资料给出的定义:</p>
+<ul>
+<li>IBinder InterfaceA well-defined behavior (i.e. methods) that Binder Objects must implement</li>
+</ul>
+<ul>
+<li><p>Binder (Object)A generic implementation of the IBinder interface</p>
+</li>
+<li><p>Binder TokenAn abstract 32-bit integer value that uniquely identifies a Binder object across all processes on the system</p>
+</li>
+</ul>
+<p>主要是binder(object)的解释，就是只要实现了ibinder的就是binder，这个ibider类根据下面的知道就是android.os.Binder<br>再看看上面的图，整个binder框架中会用到的类，就是那么几个，那么这个和android.os.Binder有关的类是哪个？</p>
+<p>当然详细的关于这几个类的分析在后面，但是现在就可以给出答案,可以看了后面再跳回来看:</p>
+<p>这是一个使用AIDL帮我们生成的类的类:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> others;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span><br><span class="line"> * Created by raymond on 7/24/16.</span><br><span class="line"> */</span></span><br><span class="line"><span class="keyword">package</span> com.example.app;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">IFooService</span> <span class="keyword">extends</span> <span class="title">android</span>.<span class="title">os</span>.<span class="title">IInterface</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Stub</span> <span class="keyword">extends</span> <span class="title">android</span>.<span class="title">os</span>.<span class="title">Binder</span> <span class="keyword">implements</span> <span class="title">com</span>.<span class="title">example</span>.<span class="title">app</span>.<span class="title">IFooService</span> </span>&#123;</span><br><span class="line">        ...</span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">static</span> com.example.app.<span class="function">IFooService <span class="title">asInterface</span><span class="params">(</span><br><span class="line">                android.os.IBinder obj)</span> </span>&#123;</span><br><span class="line">            ...</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> com.example.app.IFooService.Stub.Proxy(obj);</span><br><span class="line">        &#125;</span><br><span class="line">        ...</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">onTransact</span><span class="params">(<span class="keyword">int</span> code, android.os.Parcel data, android.os.Parcel reply, <span class="keyword">int</span></span><br><span class="line">                flags)</span> <span class="keyword">throws</span> android.os.RemoteException </span>&#123; <span class="keyword">switch</span> (code) &#123;</span><br><span class="line">            ...</span><br><span class="line">            <span class="keyword">case</span> TRANSACTION_save: &#123;</span><br><span class="line">                ...</span><br><span class="line">                com.example.app.Bar _arg0;</span><br><span class="line">                ...</span><br><span class="line">                _arg0 = com.example.app.Bar.CREATOR.createFromParcel(data);</span><br><span class="line">                <span class="keyword">this</span>.save(_arg0);</span><br><span class="line">                ...</span><br><span class="line">            &#125;</span><br><span class="line">            ... &#125;</span><br><span class="line">            ... &#125;</span><br><span class="line">        ...</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Proxy</span> <span class="keyword">implements</span> <span class="title">com</span>.<span class="title">example</span>.<span class="title">app</span>.<span class="title">IFooService</span> </span>&#123;</span><br><span class="line">            <span class="keyword">private</span> android.os.IBinder mRemote;</span><br><span class="line">            ...</span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">save</span><span class="params">(com.example.app.Bar bar)</span> <span class="keyword">throws</span> android.os.RemoteException </span>&#123;</span><br><span class="line">                ...</span><br><span class="line">                android.os.Parcel _data = android.os.Parcel.obtain();</span><br><span class="line">                ...</span><br><span class="line">                bar.writeToParcel(_data, <span class="number">0</span>);</span><br><span class="line">                ...</span><br><span class="line">                mRemote.transact(Stub.TRANSACTION_save, _data, _reply, <span class="number">0</span>); ...</span><br><span class="line">            &#125; &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>没错，就是调用图里面的那个service.stub类，是一个抽象类，他<code>extends android.os.Binder</code>这个类算作是要和C++ middleware(上图调用层里面的libbinder)通信的类，是java层面service的最下面的类。他的主要方法是ontrasict()，向这个transic data里面设置一些值，这些值可能就是返回值，ontransict()就是在他收到C++ middleware的trasiction 的时候的回调函数，他通过执行本地方法，得到结果保存到trancsiction里面并且返回。当然其实后面的比如serviceimp或者service都直接或者间接的extends了stub这个类，不过因为stub类是和c++ middleware打交道的类，是Binder机制语境中提到更多的类。</p>
+<p>另外注意proxy这个类是被client使用的，他手上有stub类的引用，也就是有Binder的引用，所以也可以看到</p>
+<p><code>mRemote.transact(Stub.TRANSACTION_save, _data, _reply, 0)</code></p>
+<p>他在向binder发送这个transact data.并且这一动作是发生在client端的。</p>
+<h2 id="u77E5_u9053_u4E86binder_u662F_u4E2Astub_uFF0C_u90A3_u4E48_uFF0C_u5230_u5E95_u600E_u4E48_u5B9E_u73B0_u7684IPC_u7684_u554A"><a href="#u77E5_u9053_u4E86binder_u662F_u4E2Astub_uFF0C_u90A3_u4E48_uFF0C_u5230_u5E95_u600E_u4E48_u5B9E_u73B0_u7684IPC_u7684_u554A" class="headerlink" title="知道了binder是个stub，那么，到底怎么实现的IPC的啊"></a>知道了binder是个stub，那么，到底怎么实现的IPC的啊</h2><p>其实所谓IPC，就是你要实现一套通信机制，这边说话那边你要听得懂，听不懂就找个中间人来翻译。同时要保证一个人说一个人听不会乱套，保证两个人不能抢着说。</p>
+<p>其实你看linux里面ipc</p>
+<ol>
+<li>socket方式，本来就是网络进程间通信方式，是在tcp之上的一套通信协议，肯定能额保证两边正常对话。</li>
+<li>pipe，其实就是两个process 一个拿读指针一个拿写指针去操作同一个文件，这个文件就是他们交流的管道，</li>
+</ol>
+<p>binder呢?</p>
+<p>它主要做了一件事情就是prcess A中<code>service_local.func(arg)</code>，这个调用实际上发生在service进程里面，类似<code>service_remote.func(arg)</code>。</p>
+<p>这里binder IPC要做的就是我不可能直接告诉你service_remote这个对象在process B里的真实地址，事实上即使你真的知道这个地址(一串数字)，由于JVM的机制，你也不可能调用func，去执行这个命令。这是出于安全的考虑，process之间有天然的隔阂。</p>
+<p>这个时候，就要一个中间人，甚至更多的中间人来帮助他们沟通</p>
+<p>这里最明显要有一个中间人在知道把这个service_local.func(arg)告诉对应的process B，并且让他在真实的service对象上进行一些列的操作。</p>
+<p>这个把调用信息告诉中间人的方法就是把这个函数调用抽象成一个特定的数据结构(我干脆理解成网络通信里面的通信包似的)</p>
+<p>这个数据结构就叫Transmission data,也有叫trasiction：</p>
+<p><img src="/images/Screen%20Shot%202016-07-24%20at%2010.38.53%20AM.png" alt="Screen Shot 2016-07-24 at 10.38.53 A"></p>
+<p>这个其实就跟网络通信的包一样嘛，几个域规定了几个特定的信息。</p>
+<p>这个transmission data就描述了这次调用。包括</p>
+<ul>
+<li>是哪个service去调用(target)，这个target真实的情况是一个binder token</li>
+</ul>
+<p>ok,ok,ok,看一眼上面的binder Token是什么。</p>
+<blockquote>
+<p>An abstract 32-bit integer value that uniquely identifies a Binder object across all processes on the system</p>
+</blockquote>
+<p>先明确一点，这个进行翻译的中间人就是binder driver,看看binder driver怎么“翻译”的:</p>
+<blockquote>
+<p>On every transaction, the binder driver automaticallymaps local addresses to remote binder handles and remote binder handles to local addresses</p>
+</blockquote>
+<p>我们确认一下，这个local address就是我们上面说的binder Token吗:</p>
+<blockquote>
+<p>A binder object reference is one of the following </p>
+<ul>
+<li>An actual virtual memory address to a binder object in the same process* An abstract 32-bit handle to a binder object inanother process</li>
+</ul>
+</blockquote>
+<p><img src="/images/Screen%20Shot%202016-07-24%20at%2011.17.30%20AM.png" alt="Screen Shot 2016-07-24 at 11.17.30 A"></p>
+<p>我们这里谈general的情况，所以都是指IPC，所以属于第二种情况。所以，没错！transaciton的target的值就是一个binder Token,binder driver的作用就是把这个binder Token翻译成指向process B的binder(stub对象)的引用!!</p>
+<blockquote>
+<p>On every transaction, the binder driver automaticallymaps local addresses to remote binder handles and remote binder handles to local addresses</p>
+</blockquote>
+<p>至此，谜团差不多解开了。</p>
+<p>其实就是process A向调B的某个方法，他不能直接调用，他把调用信息打包成一个叫trsaction的数据结构，这个结构中主要包括:</p>
+<ul>
+<li>哪个service对象去执行(binder token来表示)</li>
+<li>这个serivice的哪个方法</li>
+<li>进行过数据变换的一些函数参数（这个过程叫parcel）</li>
+</ul>
+<blockquote>
+<p>Parcel: Container for a message (data and object references) that can be sent through an IBinder</p>
+</blockquote>
+<p>然后这个trascation会通过Linux ioctl命令(c++ middleware层在做这件事)发送到binder driver这个内核空间的一块区域，在这里保存着binder token到process B binder对象（stub对象，即service对象)的引用的映射。由此就找到了真正的service对象他收到transaciton中的调用信息，进行执行，然后把返回值信息设置进一个reply parcel，然后再调用iotcl把改变过的transaction发送给client里的proxy。</p>
+<p>这个过程看上面的调用图应该很明白了。<br>这里我才醒悟的一点是，在返回的时候我在想，process B返回一个parcel而不是trascation也就是不指定地址?这不也是进程间通信吗，为什么这个就可以直接返回数据?难道不是和之前一样给一个地址符（binder Token吗）</p>
+<p>不不不，注意这里client把trasaction通过iotcl给binder driver的时候的描述：(结合第二张调用图)</p>
+<p>client：</p>
+<ul>
+<li>4)submit transaction/data via a blocking ioctl call</li>
+</ul>
+<p>service:</p>
+<ul>
+<li>5)wake up from a blocking iotcl call and get the transaction data</li>
+</ul>
+<p>service设置transaction<br>service：</p>
+<ul>
+<li>13）submit replyParcel via ioctl</li>
+<li>14）wake up from a blocking ioctl call and get transaction reply data</li>
+</ul>
+<p>再看一段关于procss B 执行完相应方法后的描述:</p>
+<blockquote>
+<p>Again it is routed through the layers to the binder driver, that transfers the parcel and wakes up the sleeping client process and delivers the reply parcel to the proxy object. </p>
+</blockquote>
+<p>也就是说client在等待这个方法的完成.调用的client一直在binder driver的iotcl这个命令中等待，所以binder driver只需要拿到了返回的parcel，他又通过iotcl把返回parcel穿给这个等待的client就可以了。</p>
+<p>所以你注意到了目前讲的全部都是阻塞式的调用。当然也可以实现非阻塞式调用。</p>
+<h3 id="binder_token__u54EA_u91CC_u6765_u7684"><a href="#binder_token__u54EA_u91CC_u6765_u7684" class="headerlink" title="binder token 哪里来的"></a>binder token 哪里来的</h3><p>前面讲了这么多，这个binder token到底是什么，反正就是只要client知道了binder Token并把它装进tracsaction里，binder driver收到后就可以通过映射关系找到真正的binder handler了。</p>
+<p>那么到底client是怎么获得binder Token 的？</p>
+<p>这里看context Manager的描述:</p>
+<blockquote>
+<p>Each Binder that needs to publish its name due to being a service, submits a name and its Binder token to the service manager. Relying on that feature, the client must only know the name of a service and asks the service manager for the Binder address of the requested service.</p>
+</blockquote>
+<p>这个context Manager有个更常用的名字service Manager</p>
+<p>service Manger也是一个service，没错，他在单独的线程一直运行着。</p>
+<p>他的作用就是把service name映射成binder token, 每个service都需要注册，这个你是懂的，在manifest里面。注册就是发生在这个service Manager里面。生成一条记录:servcice name -&gt;binder token.</p>
+<p>所以当client 请求其他服务的时候第一件要做的事情就是向service manager做出请求，然后通过Binder机制，得到要请求的服务的binder token传给proxy，proxy会放到transaction里面。</p>
+<p>这里的问题上是，如果必须要通过service manger才能得到binder token (相当于service binder的地址)，那servicemanger自己的地址我怎么知道呢?</p>
+<p>这个已经规定好了，向servicemanager请求服务，binder token 无需查询，就是0！直接用。</p>
+<h3 id="AIDL"><a href="#AIDL" class="headerlink" title="AIDL"></a>AIDL</h3><p>好了，Binder机制差不多了吧。这里还是看上图，关键的有两个类，一个是stub类，一个是proxy类，分别是和c++ middleware打交道的属于service process和client process的两个类。</p>
+<p>这两个类规定了如何parcel函数调用的参数。</p>
+<p>其中</p>
+<ul>
+<li>stub类继承了ibinder，他就是常说的binder 对象,这一层是用来和transaction数据打交道的，把从C++ middle ware层收到的parcel参数转化为java 类型供上面的service的真正的实现使用的</li>
+<li>proxy类拥有stub对象的引用service，也就是binder的引用(实际在放入transaction的时候是binder token)，他负责当client调用service.func的时候把参数进行parcel放入transcation然后传入C++ middleware层</li>
+</ul>
+<p>那么AIDL的作用就是:</p>
+<p>你负责提供一个service的interface，也就是各个函数的声明(指示了参数类型，返回值类型，函数名)。</p>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">package com.marakana.android.fibonaccicommon;import com.marakana.android.fibonaccicommon.FibonacciRequest; </span><br><span class="line">import com.marakana.android.fibonaccicommon.FibonacciResponse;</span><br><span class="line"><span class="keyword">interface</span> <span class="title">IFibonacciService</span> &#123;	<span class="function"><span class="keyword">long</span> <span class="title">fibJR</span>(<span class="params"><span class="keyword">in</span> <span class="keyword">long</span> n</span>)</span>;	<span class="function"><span class="keyword">long</span> <span class="title">fibJI</span>(<span class="params"><span class="keyword">in</span> <span class="keyword">long</span> n</span>)</span>;	<span class="function"><span class="keyword">long</span> <span class="title">fibNR</span>(<span class="params"><span class="keyword">in</span> <span class="keyword">long</span> n</span>)</span>;	<span class="function"><span class="keyword">long</span> <span class="title">fibNI</span>(<span class="params"><span class="keyword">in</span> <span class="keyword">long</span> n</span>)</span>;	<span class="function">FibonacciResponse <span class="title">fib</span>(<span class="params"><span class="keyword">in</span> FibonacciRequest request</span>)</span>;&#125;</span><br></pre></td></tr></table></figure>
+<p>然后AIDL根据这个Interface就自动帮你生成上面的stub和proxy两个类(那两个类确实也只需要这些信息，他们的作用只是为这些类型提供parcel化而已)</p>
+<p>所以AIDL的全称叫Android Interface Definition Language。<br>确实只是定义了一个interface而已。</p>
+<h4 id="AIDL_u7684_u5177_u4F53_u64CD_u4F5C"><a href="#AIDL_u7684_u5177_u4F53_u64CD_u4F5C" class="headerlink" title="AIDL的具体操作"></a>AIDL的具体操作</h4><ol>
+<li>java统计目录新键一个aild package（上面的例子直接叫fibonaccicommon了）</li>
+<li>在这个package下新键一个.aidl文件,在里面声明接口</li>
+<li>像上面那个例子用到了自定义的对象(FibonacciRequest和response)，那么就要Import这个类，同时要注意这个model类要implements parcelable才可以，上面一直强调了。</li>
+<li>这个.aidl文件不只在server的app中要有，在client那边也必须要有个一样的。因为生成的类既有service process调用的stub又有client要调用的proxy.</li>
+<li>build即可自动生成含有sutb和proxy的类了</li>
+</ol>
+<p>上面有写一个大致的自动生成的框架，今天刚好在网上看到了一个国内博客的<a href="http://android.jobbole.com/83957/" target="_blank" rel="external">Android 手写 Binder 教你理解 android 中的进程间通信-希尔瓦娜斯女神</a>，例子比较实在:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> others;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span><br><span class="line"> * Created by raymond on 7/24/16.</span><br><span class="line"> */</span></span><br><span class="line"><span class="comment">/*</span><br><span class="line"> * This file is auto-generated.  DO NOT MODIFY.</span><br><span class="line"> * Original file: C:\\Users\\Administrator\\WriteBinderCodeExample\\app\\src\\main\\aidl\\com\\example\\administrator\\writebindercodeexample\\IPersonManager.aidl</span><br><span class="line"> */</span></span><br><span class="line"><span class="keyword">package</span> com.example.administrator.writebindercodeexample;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">IPersonManager</span> <span class="keyword">extends</span> <span class="title">android</span>.<span class="title">os</span>.<span class="title">IInterface</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span><br><span class="line">     * Local-side IPC implementation stub class.</span><br><span class="line">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Stub</span> <span class="keyword">extends</span> <span class="title">android</span>.<span class="title">os</span>.<span class="title">Binder</span> <span class="keyword">implements</span> <span class="title">com</span>.<span class="title">example</span>.<span class="title">administrator</span>.<span class="title">writebindercodeexample</span>.<span class="title">IPersonManager</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> java.lang.String DESCRIPTOR = <span class="string">"com.example.administrator.writebindercodeexample.IPersonManager"</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/**</span><br><span class="line">         * Construct the stub at attach it to the interface.</span><br><span class="line">         */</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">Stub</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.attachInterface(<span class="keyword">this</span>, DESCRIPTOR);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/**</span><br><span class="line">         * Cast an IBinder object into an com.example.administrator.writebindercodeexample.IPersonManager interface,</span><br><span class="line">         * generating a proxy if needed.</span><br><span class="line">         */</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">static</span> com.example.administrator.writebindercodeexample.<span class="function">IPersonManager <span class="title">asInterface</span><span class="params">(android.os.IBinder obj)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> ((obj == <span class="keyword">null</span>)) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            android.os.IInterface iin = obj.queryLocalInterface(DESCRIPTOR);</span><br><span class="line">            <span class="keyword">if</span> (((iin != <span class="keyword">null</span>) &amp;&amp; (iin <span class="keyword">instanceof</span> com.example.administrator.writebindercodeexample.IPersonManager))) &#123;</span><br><span class="line">                <span class="keyword">return</span> ((com.example.administrator.writebindercodeexample.IPersonManager) iin);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> com.example.administrator.writebindercodeexample.IPersonManager.Stub.Proxy(obj);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="annotation">@Override</span></span><br><span class="line">        <span class="keyword">public</span> android.os.<span class="function">IBinder <span class="title">asBinder</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="annotation">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">onTransact</span><span class="params">(<span class="keyword">int</span> code, android.os.Parcel data, android.os.Parcel reply, <span class="keyword">int</span> flags)</span> <span class="keyword">throws</span> android.os.RemoteException </span>&#123;</span><br><span class="line">            <span class="keyword">switch</span> (code) &#123;</span><br><span class="line">                <span class="keyword">case</span> INTERFACE_TRANSACTION: &#123;</span><br><span class="line">                    reply.writeString(DESCRIPTOR);</span><br><span class="line">                    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">case</span> TRANSACTION_getPersonList: &#123;</span><br><span class="line">                    data.enforceInterface(DESCRIPTOR);</span><br><span class="line">                    java.util.List&lt;com.example.administrator.writebindercodeexample.Person&gt; _result = <span class="keyword">this</span>.getPersonList();</span><br><span class="line">                    reply.writeNoException();</span><br><span class="line">                    reply.writeTypedList(_result);</span><br><span class="line">                    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">case</span> TRANSACTION_addPerson: &#123;</span><br><span class="line">                    data.enforceInterface(DESCRIPTOR);</span><br><span class="line">                    com.example.administrator.writebindercodeexample.Person _arg0;</span><br><span class="line">                    <span class="keyword">if</span> ((<span class="number">0</span> != data.readInt())) &#123;</span><br><span class="line">                        _arg0 = com.example.administrator.writebindercodeexample.Person.CREATOR.createFromParcel(data);</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        _arg0 = <span class="keyword">null</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">this</span>.addPerson(_arg0);</span><br><span class="line">                    reply.writeNoException();</span><br><span class="line">                    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">super</span>.onTransact(code, data, reply, flags);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Proxy</span> <span class="keyword">implements</span> <span class="title">com</span>.<span class="title">example</span>.<span class="title">administrator</span>.<span class="title">writebindercodeexample</span>.<span class="title">IPersonManager</span> </span>&#123;</span><br><span class="line">            <span class="keyword">private</span> android.os.IBinder mRemote;</span><br><span class="line"></span><br><span class="line">            Proxy(android.os.IBinder remote) &#123;</span><br><span class="line">                mRemote = remote;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="annotation">@Override</span></span><br><span class="line">            <span class="keyword">public</span> android.os.<span class="function">IBinder <span class="title">asBinder</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> mRemote;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">public</span> java.lang.<span class="function">String <span class="title">getInterfaceDescriptor</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> DESCRIPTOR;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="annotation">@Override</span></span><br><span class="line">            <span class="keyword">public</span> java.util.List&lt;com.example.administrator.writebindercodeexample.Person&gt; getPersonList() <span class="keyword">throws</span> android.os.RemoteException &#123;</span><br><span class="line">                android.os.Parcel _data = android.os.Parcel.obtain();</span><br><span class="line">                android.os.Parcel _reply = android.os.Parcel.obtain();</span><br><span class="line">                java.util.List&lt;com.example.administrator.writebindercodeexample.Person&gt; _result;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    _data.writeInterfaceToken(DESCRIPTOR);</span><br><span class="line">                    mRemote.transact(Stub.TRANSACTION_getPersonList, _data, _reply, <span class="number">0</span>);</span><br><span class="line">                    _reply.readException();</span><br><span class="line">                    _result = _reply.createTypedArrayList(com.example.administrator.writebindercodeexample.Person.CREATOR);</span><br><span class="line">                &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                    _reply.recycle();</span><br><span class="line">                    _data.recycle();</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">return</span> _result;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="annotation">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addPerson</span><span class="params">(com.example.administrator.writebindercodeexample.Person person)</span> <span class="keyword">throws</span> android.os.RemoteException </span>&#123;</span><br><span class="line">                android.os.Parcel _data = android.os.Parcel.obtain();</span><br><span class="line">                android.os.Parcel _reply = android.os.Parcel.obtain();</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    _data.writeInterfaceToken(DESCRIPTOR);</span><br><span class="line">                    <span class="keyword">if</span> ((person != <span class="keyword">null</span>)) &#123;</span><br><span class="line">                        _data.writeInt(<span class="number">1</span>);</span><br><span class="line">                        person.writeToParcel(_data, <span class="number">0</span>);</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        _data.writeInt(<span class="number">0</span>);</span><br><span class="line">                    &#125;</span><br><span class="line">                    mRemote.transact(Stub.TRANSACTION_addPerson, _data, _reply, <span class="number">0</span>);</span><br><span class="line">                    _reply.readException();</span><br><span class="line">                &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                    _reply.recycle();</span><br><span class="line">                    _data.recycle();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TRANSACTION_getPersonList = (android.os.IBinder.FIRST_CALL_TRANSACTION + <span class="number">0</span>);</span><br><span class="line">        <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TRANSACTION_addPerson = (android.os.IBinder.FIRST_CALL_TRANSACTION + <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> java.util.List&lt;com.example.administrator.writebindercodeexample.Person&gt; getPersonList() <span class="keyword">throws</span> android.os.RemoteException;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addPerson</span><span class="params">(com.example.administrator.writebindercodeexample.Person person)</span> <span class="keyword">throws</span> android.os.RemoteException</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>比较明显可以看到stub和proxy都是以子类的形式生成。</p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> android.os.SystemClock;<span class="keyword">import</span> android.util.Log;<span class="keyword">import</span> com.marakana.android.fibonaccicommon.FibonacciRequest; </span><br><span class="line"><span class="keyword">import</span> com.marakana.android.fibonaccicommon.FibonacciResponse; </span><br><span class="line"><span class="keyword">import</span> com.marakana.android.fibonaccicommon.IFibonacciService; </span><br><span class="line"><span class="keyword">import</span> com.marakana.android.fibonaccinative.FibLib;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">IFibonacciServiceImpl</span> <span class="keyword">extends</span> <span class="title">IFibonacciService</span>.<span class="title">Stub</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String TAG = <span class="string">"IFibonacciServiceImpl"</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">long</span> <span class="title">fibJI</span><span class="params">(<span class="keyword">long</span> n)</span> </span>&#123;</span><br><span class="line">        Log.d(TAG, String.format(<span class="string">"fibJI(%d)"</span>, n));</span><br><span class="line">        <span class="function"><span class="keyword">return</span> FibLib.<span class="title">fibJI</span><span class="params">(n)</span></span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">long</span> <span class="title">fibJR</span><span class="params">(<span class="keyword">long</span> n)</span> </span>&#123;</span><br><span class="line">        Log.d(TAG, String.format(<span class="string">"fibJR(%d)"</span>, n));</span><br><span class="line">        <span class="function"><span class="keyword">return</span> FibLib.<span class="title">fibJR</span><span class="params">(n)</span></span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">long</span> <span class="title">fibNI</span><span class="params">(<span class="keyword">long</span> n)</span> </span>&#123;</span><br><span class="line">        Log.d(TAG, String.format(<span class="string">"fibNI(%d)"</span>, n));</span><br><span class="line">        <span class="function"><span class="keyword">return</span> FibLib.<span class="title">fibNI</span><span class="params">(n)</span></span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">long</span> <span class="title">fibNR</span><span class="params">(<span class="keyword">long</span> n)</span> </span>&#123;</span><br><span class="line">        Log.d(TAG, String.format(<span class="string">"fibNR(%d)"</span>, n));</span><br><span class="line">        <span class="function"><span class="keyword">return</span> FibLib.<span class="title">fibNR</span><span class="params">(n)</span></span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function">FibonacciResponse <span class="title">fib</span><span class="params">(FibonacciRequest request)</span> </span>&#123;</span><br><span class="line">        Log.d(TAG,</span><br><span class="line">                String.format(<span class="string">"fib(%d, %s)"</span>, request.getN(), request.getType()));</span><br><span class="line">        <span class="keyword">long</span> timeInMillis = SystemClock.uptimeMillis();</span><br><span class="line">        <span class="keyword">long</span> result;</span><br><span class="line">        <span class="keyword">switch</span> (request.getType()) &#123;</span><br><span class="line">            <span class="keyword">case</span> ITERATIVE_JAVA:</span><br><span class="line">                result = <span class="keyword">this</span>.fibJI(request.getN());</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> RECURSIVE_JAVA:</span><br><span class="line">                result = <span class="keyword">this</span>.fibJR(request.getN());</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> ITERATIVE_NATIVE:</span><br><span class="line">                result = <span class="keyword">this</span>.fibNI(request.getN());</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> RECURSIVE_NATIVE:</span><br><span class="line">                result = <span class="keyword">this</span>.fibNR(request.getN());</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">default</span>:</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        timeInMillis = SystemClock.uptimeMillis() - timeInMillis;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> FibonacciResponse(result, timeInMillis);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我这里偷懒又回到了slides中的那个例子，这里就是在真正实现service 之前，又垫一层serviceimpl类,这个类是真正实现service功能的类，这里的fibonacci函数是调用的一个<code>com.marakana.android.fibonaccinative.FibLib</code>专门的库的类的函数来实现相关功能。</p>
+<p>然后</p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">package</span> com.marakana.android.fibonacciservice;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> android.app.Service;</span><br><span class="line"><span class="keyword">import</span> android.content.Intent;</span><br><span class="line"><span class="keyword">import</span> android.os.IBinder;</span><br><span class="line"><span class="keyword">import</span> android.util.Log;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FibonacciService</span> <span class="keyword">extends</span> <span class="title">Service</span> </span>&#123; <span class="comment">// private static final String TAG = "FibonacciService"; private IFibonacciServiceImpl service; //</span></span><br><span class="line">    <span class="annotation">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">onCreate</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate();</span><br><span class="line">        <span class="keyword">this</span>.service = <span class="keyword">new</span> IFibonacciServiceImpl(); <span class="comment">// Log.d(TAG, "onCreate()'ed"); //</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="annotation">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="function">IBinder <span class="title">onBind</span><span class="params">(Intent intent)</span> </span>&#123;</span><br><span class="line">        Log.d(TAG, <span class="string">"onBind()'ed"</span>); <span class="comment">//</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.service; <span class="comment">// &#125;</span></span><br><span class="line">        <span class="annotation">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="function"><span class="keyword">boolean</span> <span class="title">onUnbind</span> <span class="params">(Intent intent)</span></span>&#123;</span><br><span class="line">            Log.d(TAG, <span class="string">"onUnbind()'ed"</span>); <span class="comment">//</span></span><br><span class="line">            <span class="function"><span class="keyword">return</span> <span class="keyword">super</span>.<span class="title">onUnbind</span><span class="params">(intent)</span></span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="annotation">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">onDestroy</span> <span class="params">()</span> </span>&#123;</span><br><span class="line">            Log.d(TAG, <span class="string">"onDestroy()'ed"</span>);</span><br><span class="line">            <span class="keyword">this</span>.service = <span class="keyword">null</span>;</span><br><span class="line">            <span class="keyword">super</span>.onDestroy();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>终于到了我们之前在service里已经见过的正常的service的供app直接调用的service的类的实现了，这里onBind,onUnbind这些函数都是继承service应该实现的类。用来用作回调。</p>
+<h3 id="Async_Binder_IPC"><a href="#Async_Binder_IPC" class="headerlink" title="Async Binder IPC"></a>Async Binder IPC</h3><p>前面我们分析过了之前讲的全是阻塞式的binder，也是就client要等待service返回，其中ioctl一直会挂起等待。</p>
+<p>这里来看看如何生成异步的bidner IPC.</p>
+<p>其实最好肯定是看代码,还是上面那个slides讲得不要更清楚。但是这里真的不能再贴代码了。。。。</p>
+<p>原理很好理解，就是在写你再写一个interface叫IFibonacciServiceResponseListener,也就是说在client端调用service的函数的时候都要传一个这个listener的对象作为参数，这个对象当然是在client端生成并且实现的。</p>
+<p>然后等到service执行完函数后，他没有return reuslt这种语句，而是调用listenr的onResponse这个回调函数。</p>
+<p>看到这里明白了</p>
+<p>对!service居然也在远程调用一个client对象(listener)。</p>
+<p>要怎么实现?也用BInder啊!!所以解决办法就是用相同的办法去写listener和service的aidl，然后同时生成他俩的各种stub，proxy这些，总之就是listenr这个也是个服务对象了。</p>
+<p>所以我们同时要写两个aidl文件:</p>
+<p>唯一区别就是要在aidl文件中声明interface的时候要加上关键字oneway：</p>
+<p>文件FibonacciCommon/src/com/marakana/android/fibonaccicommon/IFibonacciServiceResponseListener.aidl:</p>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">oneway <span class="keyword">interface</span> <span class="title">IFibonacciServiceResponseListener</span> &#123; </span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">onResponse</span>(<span class="params"><span class="keyword">in</span> FibonacciResponse response</span>)</span>;&#125;</span><br></pre></td></tr></table></figure>
+<p>文件FibonacciCommon/src/com/marakana/android/fibonaccicommon/IFibonacciService.aidl:</p>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">oneway <span class="keyword">interface</span> <span class="title">IFibonacciService</span> &#123;	<span class="function"><span class="keyword">void</span> <span class="title">fib</span>(<span class="params"><span class="keyword">in</span> FibonacciRequest request, <span class="keyword">in</span> IFibonacciServiceResponseListener listener</span>)</span>;&#125;</span><br></pre></td></tr></table></figure>
+<p>我想这个oneway的作用就是告诉ioctl不用挂起等待吧。一次性结束，当service要调用client的函数的时候他自己会重新走一遍进程间的通信流程。</p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p>并没有找到讲binder机制特别清晰的中文资料</p>
+<p>终于在youtube上找到一个<a href="https://www.youtube.com/watch?v=Jgampt1DOak">演讲</a>和<a href="http://events.linuxfoundation.org/images/stories/slides/abs2013_gargentas.pdf">slides</a>,以及<a href="https://www.nds.rub.de/media/attachments/files/2012/03/binder.pdf">这篇</a>资料作为补充，从更全面的角度介绍了更细致的前因后果的</p>]]>
+    
+    </summary>
+    
+      <category term="java，Android" scheme="http://potatoker.github.io/tags/java%EF%BC%8CAndroid/"/>
+    
+      <category term="Android" scheme="http://potatoker.github.io/categories/Android/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[图片OOM]]></title>
+    <link href="http://potatoker.github.io/2016/08/16/OOM/"/>
+    <id>http://potatoker.github.io/2016/08/16/OOM/</id>
+    <published>2016-08-16T01:20:30.000Z</published>
+    <updated>2016-08-17T03:55:00.252Z</updated>
+    <content type="html"><![CDATA[<p>之前在超狗的测试中在中低端型机上遇到了图片问题造成的OOM，虽然最后还是用resize的方式解决的，这里还是整理一下当时遇到的一些问题。</p>
+<a id="more"></a> 
+<h2 id="u4E00_u4E2A_u4E8B_u5B9E_uFF1A"><a href="#u4E00_u4E2A_u4E8B_u5B9E_uFF1A" class="headerlink" title="一个事实："></a>一个事实：</h2><blockquote>
+<p>On Android 2.3.3 (API level 10) and lower, the backing pixel data for a bitmap is stored in native memory. It is separate from the bitmap itself, which is stored in the Dalvik heap. The pixel data in native memory is not released in a predictable manner, potentially causing an application to briefly exceed its memory limits and crash. As of Android 3.0 (API level 11), the pixel data is stored on the Dalvik heap along with the associated bitmap.</p>
+</blockquote>
+<h2 id="u4E0D_u540C_u7248_u672C_u5BF9bitmap_u5B58_u50A8_u7BA1_u7406_u7684_u4E0D_u540C_u5904_u7406_3A"><a href="#u4E0D_u540C_u7248_u672C_u5BF9bitmap_u5B58_u50A8_u7BA1_u7406_u7684_u4E0D_u540C_u5904_u7406_3A" class="headerlink" title="不同版本对bitmap存储管理的不同处理:"></a>不同版本对bitmap存储管理的不同处理:</h2><p> 首先，说一下Android 2.3–2.3.7 “Gingerbread”和其以后的android版本的区别:</p>
+<blockquote>
+<p>On Android Android 2.2 (API level 8) and lower, when garbage collection occurs, your app’s threads get stopped. This causes a lag that can degrade performance. Android 2.3 adds concurrent garbage collection, which means that the memory is reclaimed soon after a bitmap is no longer referenced.</p>
+<p>On Android 2.3.3 (API level 10) and lower, the backing pixel data for a bitmap is stored in native memory. It is separate from the bitmap itself, which is stored in the Dalvik heap. The pixel data in native memory is not released in a predictable manner, potentially causing an application to briefly exceed its memory limits and crash. As of Android 3.0 (API level 11), the pixel data is stored on the Dalvik heap along with the associated bitmap.</p>
+</blockquote>
+<p> 就是说，在android2.3.3之前，有关于bitmap的两个显著不同:</p>
+<h3 id="Android3-0_u4E4B_u524D_2Cbitmap_pixel_data_u5B58_u5728ashmem_u91CC_u9762"><a href="#Android3-0_u4E4B_u524D_2Cbitmap_pixel_data_u5B58_u5728ashmem_u91CC_u9762" class="headerlink" title="Android3.0之前,bitmap pixel data存在ashmem里面"></a>Android3.0之前,bitmap pixel data存在ashmem里面</h3><ol>
+<li>在android2.3.3之前，bitmap这个对象的存储，和bitmap pixel的存储是分开的！bitmap对象是存在heap上的(图的大小啊，pixel的位置信息等),然而真正的图像(pixel)是存储在ashmen里面的，属于native区域。我们知道java GC的原理是根据引用的GC root，可是你就会发现这里图像pixel压根不算做对象，也没有引用，他只是单纯的占用了一块内存区域，所以平常的GC root判断GC的方法对在ashmen里面的pixel来说没用，所以需要系统或者我们自己来对这块区域的内存做恰当的管理。</li>
+</ol>
+<h4 id="ahmem_u5230_u5E95_u662F_u4EC0_u4E48"><a href="#ahmem_u5230_u5E95_u662F_u4EC0_u4E48" class="headerlink" title="ahmem到底是什么"></a>ahmem到底是什么</h4><blockquote>
+<p>在Android系统中，提供了独特的匿名共享内存子系统Ashmem（Anonymous Shared Memory），它以驱动程序的形式实现在内核空间中。</p>
+</blockquote>
+<p> 原来asmem存在于内核空间，不属于任何一个单个jvm的一部分，但是，在查阅资料中发现:</p>
+<blockquote>
+<p>the GB Dalvik VM adds the sizes of both the Java and native heaps when determining if the app will exceed the max heap size for the app, which is device specific.</p>
+</blockquote>
+<p>也就是说系统也规定了这个process使用native区域的大小，要是和java heap加起来的大小来算OOM的。</p>
+<p>也就是说如果ashmem管理不当，也有可能会OOM,应该是非常可能发生OOM,因为正常的java gc方法在这块区域不被使用。</p>
+<p><a href="http://blog.csdn.net/luoshengyang/article/details/6664554" target="_blank" rel="external">Android系统匿名共享内存Ashmem（Anonymous Shared Memory）驱动程序源代码分析-罗升阳</a>介绍:</p>
+<blockquote>
+<p>它向Linux内存管理系统的内存回收算法注册接口，告诉Linux内存管理系统它的某些内存块不再使用了，可以被回收了，不过，这些不再使用的内存需要由它的使用者来告诉Ashmem驱动程序。通过这种用户-Ashmem驱动程序-内存管理系统三者的紧密合作，实现有效的内存管理机制，适合移动设备小内存的特点。</p>
+</blockquote>
+<h5 id="shmem_u5185_u5B58_u662F_u600E_u4E48_u88AB_u7BA1_u7406_u7684"><a href="#shmem_u5185_u5B58_u662F_u600E_u4E48_u88AB_u7BA1_u7406_u7684" class="headerlink" title="shmem内存是怎么被管理的"></a>shmem内存是怎么被管理的</h5><p>回到最开始的问题，那在2.3之前，系统是怎么判断清除ahsmem不用的内存的呢？</p>
+<p>看<a href="http://stackoverflow.com/questions/3823799/android-bitmap-recycle-how-does-it-work" target="_blank" rel="external">SO</a>的解释:</p>
+<blockquote>
+<p>I think the problem is this: On pre-Honeycomb versions of Android, the actual raw bitmap data is not stored in VM memory but in native memory instead. This native memory is freed when the corresponding java Bitmap object is GC’d.</p>
+<p>However, when you run out of native memory, the dalvik GC isn’t triggered, so it is possible that your app uses very little of the java memory, so the dalvik GC is never invoked, yet it uses tons of native memory for bitmaps which eventually causes an OOM error.</p>
+</blockquote>
+<p>我觉得系统默认的管理ahsmem中pixel的方式是，如果bitmap对象被GC了，那么对应的ashmem也被清除。</p>
+<p>看起来挺好的，可是有没有一种情况是，java heap里面空间很松散，有几个bitmap对象而已，即使这些bitmp对象被标记为可清除了，可是因为空间很足，GC<br>是很可能很长时间不会被触发的。可是asmeme中的区域可能已经被占用很大啊。那么OOM很可能会发生。</p>
+<p>那只能手动的去管理。有两个办法:</p>
+<ol>
+<li><p>调用Bitmap.recycle()<br> 这也是官网上说的办法:</p>
+<blockquote>
+<p>On Android 2.3.3 (API level 10) and lower, using recycle() is recommended. If you’re displaying large amounts of bitmap data in your app, you’re likely to run into OutOfMemoryError errors. The recycle() method allows an app to reclaim memory as soon as possible.</p>
+</blockquote>
+</li>
+<li><p>使用finalizer</p>
+</li>
+</ol>
+<blockquote>
+<p>The finalize method is called when an object is about to get garbage collected. That can be at any time after it has become eligible for garbage collection.</p>
+<p>finalize should only be used for cleanup of (usually non-Java) resources. And that’s exactly because the JVM doesn’t guarantee that finalize is ever called on any object.</p>
+</blockquote>
+<p>都是清除内存的方式。</p>
+<p>其实比较官方的还是用Bitmap.recycle(),要自定义实现使用引用计数法，去判断何时应该去recycle一个bitmap对象。这个是官网对于图片处理的例子。</p>
+<p>在2.3以下，不能靠GC root的方法去判断GC一个bitmap pixel，要人工的去使用引用计数法，使用recycle()函数去释放着块内存，非常的琐碎。人工的去进行内存管理可能出问题，其实这时候已经像C++一样去操作内存了。</p>
+<h3 id="Android_2-3_u4E4B_u524D_uFF0CGC_u65B9_u5F0F_u4E0D_u662Fcocurrent_GC"><a href="#Android_2-3_u4E4B_u524D_uFF0CGC_u65B9_u5F0F_u4E0D_u662Fcocurrent_GC" class="headerlink" title="Android 2.3之前，GC方式不是cocurrent GC"></a>Android 2.3之前，GC方式不是cocurrent GC</h3><p>再来看第二个:</p>
+<ol>
+<li>On Android Android 2.2 (API level 8) and lower, when garbage collection occurs, your app’s threads get stopped. This causes a lag that can degrade performance. Android 2.3 adds concurrent garbage collection, which means that the memory is reclaimed soon after a bitmap is no longer referenced.</li>
+</ol>
+<p>可以在JVM一篇回忆几种垃圾回收器。</p>
+<p>开始时没明白这里强调垃圾回收机制的变化和ashmem以及OOM有啥关系，他这里暗示说:</p>
+<blockquote>
+<p>which means that the memory is reclaimed soon after a bitmap is no longer referenced.</p>
+</blockquote>
+<p>拿到coccurent GC是即时回收的？如果是即时回收的话，确实可以作为2.2之前容易产生ashmem OOM的原因，因为还是上面那个例子，因为heap里面的不及时回收导致了ashmem的OOM，有了即时回收，就可以很大程度上解决GC卡顿或者OOM的问题。</p>
+<p>另外dalvik的 coccurent GC 垃圾回收算法采用的是标记清除算法(没错，最简单那种)，到了ART，则使用了标记整理，这些垃圾回收机制的升级都一定程度上缓解了OOM或者频繁GC的卡顿问题。</p>
+<h3 id="android3-0_u4EE5_u540E_28bitmap_u5B8C_u5168_u5728hava_heap_29_u7684_u95EE_u9898"><a href="#android3-0_u4EE5_u540E_28bitmap_u5B8C_u5168_u5728hava_heap_29_u7684_u95EE_u9898" class="headerlink" title="android3.0以后(bitmap完全在hava heap)的问题"></a>android3.0以后(bitmap完全在hava heap)的问题</h3><p>然而我们再来看一遍fresco的介绍:</p>
+<blockquote>
+<p>解压后的图片，即Android中的Bitmap，占用大量的内存。大的内存占用势必引发更加频繁的GC。在5.0以下，GC将会显著地引发界面卡顿。</p>
+<p>在5.0以下系统，Fresco将图片放到一个特别的内存区域。当然，在图片不显示的时候，占用的内存会自动被释放。这会使得APP更加流畅，减少因图片内存占用而引发的OOM。</p>
+</blockquote>
+<p>为什么特别提到了5.0以下呢,不是ashmem的问题在3.0中就已经解决了吗，3.0的时候不仅已经把pixel放到heap了，垃圾收集器也进化了，问题是不是算是解决了?</p>
+<h4 id="bimap_u5BF9_u8C61_u590D_u7528_u6765_u89E3_u51B3_u9891_u7E41GC"><a href="#bimap_u5BF9_u8C61_u590D_u7528_u6765_u89E3_u51B3_u9891_u7E41GC" class="headerlink" title="bimap对象复用来解决频繁GC"></a>bimap对象复用来解决频繁GC</h4><p>上面说了，bitmap太大的时候回引发频繁的GC，会造成系统卡顿，那么怎么解决呢?</p>
+<blockquote>
+<p>Android 3.0 (API level 11) introduces the BitmapFactory.Options.inBitmap field. If this option is set, decode methods that take the Options object will attempt to reuse an existing bitmap when loading content. This means that the bitmap’s memory is reused, resulting in improved performance, and removing both memory allocation and de-allocation</p>
+</blockquote>
+<p>哦，原来安卓官方搞了一个inBitmap的的option用来标记一个Bitmap对象是可被复用的，就像listview的convertview一样。这样就减少了GC，还减少了construction和desconstruction的时间。问题解决了。</p>
+<p>既然这样，fresco有何用?</p>
+<p>解释这个之前，先看这个:</p>
+<blockquote>
+<p>However, there are certain restrictions with how inBitmap can be used. In particular, before Android 4.4 (API level 19), only equal sized bitmaps are supported.</p>
+</blockquote>
+<p>原来是有限制的。重用的bitmap要有相同的大小，恩，就和listView里，重用的items layout结构也必须是一样的。</p>
+<p>也就是说4.4之前的都不太可能用好这个性质，bitmap还是会引发频繁的GC咯。</p>
+<p>这里概括几个版本对bitmap处理的问题:</p>
+<ol>
+<li>3.0之前<ol>
+<li>bitmap的pixel放在ashmem里面，属于native区域，pixel区域的回收需要heap里面bitmap对象的回收，然而由于GC的延迟性，即使bitmap不被需要，也不会被马上回收，bitmap对象是不叫小，但pixel很大，所以会造成OOM</li>
+<li>android 2.3之前，回收器不是cocurren GC，文档暗示说cocurrent GC会比较快的回收不需要的bitmap对象。所以2.3之前这个问题更严重。</li>
+</ol>
+</li>
+</ol>
+<ol>
+<li>4.4之前<br> bitmap的pixel也放到了java heap里面。虽然BitmapFactory.Options.inBitmap这个选项这可以对bitmap对象进行复用，减少频繁GC带来的卡顿，但是这个版本这一功能只可以对相同大小的bitmap对象复用，这无疑是一个很大的限制</li>
+</ol>
+<ol>
+<li>4.4之后<br> 4.4之后官方修复了只能对相同大小bitmap服用的的限制。</li>
+</ol>
+<p>所以可以看出来4.4之后已有的办法，才算是对Bitmap的存储做了一个比较好的处理.</p>
+<p>这也是为什么freso一直在针对5.0以下的版本在说。</p>
+<h2 id="fresco_u5BF9bitmap_u7684_u5904_u7406_u65B9_u5F0F"><a href="#fresco_u5BF9bitmap_u7684_u5904_u7406_u65B9_u5F0F" class="headerlink" title="fresco对bitmap的处理方式"></a>fresco对bitmap的处理方式</h2><p>那么fresco到底是怎么对5.0以下版本进行Bitmap存储优化的呢?</p>
+<p>还是看文档介绍的:</p>
+<blockquote>
+<p>在5.0以下系统，Fresco将图片放到一个特别的内存区域。当然，在图片不显示的时候，占用的内存会自动被释放。这会使得APP更加流畅，减少因图片内存占用而引发的OOM。</p>
+</blockquote>
+<p>加上之前的关于ashmem的介绍差不多可以理解了</p>
+<p>fresco使用的核心是使用了自定义Drawable类。这个类和ashmem中pixel data的管理息息相关，这里稍微扫了眼源码，这个类确实有采用引用计数法对其成员变量进行管理，这里应该就是图片数据的引用了。</p>
+<p>其实可以看到前面的ahmem的做法，无非就是有一个问题，就是当实际上这个bitmap pixel是不被需要的时候，系统自己是没办法马上就把ahsmem这部分给清除的。那只要我自己能够很快地清除他，不久完美解决了吗。</p>
+<p>所以我觉得fresco的思路是，他会把bitmap的pixel还是放在ashmem区域，但是和系统不一样的是，他会自己来好好地处理这一块区域，因为这一块区域是linux kernel 区域，应该是可以调用本地C++清除方式，比如上面的recycle应该就是一种C++的清除方式，可以立即清除，也许fresco就是用的recycle方法，或者使用native方法接口来做垃圾回收。</p>
+<p>另外fresco的这个好处我觉得也确实是他说的，使用一套方案解决了不同机型bitmap问题，否则要是真的按系统方法，必须要不停地去判断，然后采取对应这个系统版本的bitmap处理方法。</p>
+<h2 id="fresco_u7684_u7279_u70B9_u603B_u7ED3"><a href="#fresco_u7684_u7279_u70B9_u603B_u7ED3" class="headerlink" title="fresco的特点总结"></a>fresco的特点总结</h2><p>这里看一下fresco的特点</p>
+<ol>
+<li>三级缓存，当然其他的库很多也做到了</li>
+</ol>
+<p>一般的图片的比较完善的缓存机制:</p>
+<p><img src="/images/fresco.png" alt=""></p>
+<ol>
+<li>利用ashmem</li>
+</ol>
+<blockquote>
+<p>在5.0系统以下，Image Pipeline 使用`pinned purgeables*将Bitmap数据避开Java堆内存，存在ashmem中。这要求图片不使用时，要显式地释放内存。</p>
+<p>SimpleDraweeView 自动处理了这个释放过程，所以没有特殊情况，尽量使用SimpleDraweeView，在特殊的场合，如果有需要，也可以直接控制Image Pipeline。</p>
+</blockquote>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p>之前在超狗的测试中在中低端型机上遇到了图片问题造成的OOM，虽然最后还是用resize的方式解决的，这里还是整理一下当时遇到的一些问题。</p>]]>
+    
+    </summary>
+    
+      <category term="java，Android" scheme="http://potatoker.github.io/tags/java%EF%BC%8CAndroid/"/>
+    
+      <category term="Android" scheme="http://potatoker.github.io/categories/Android/"/>
+    
+  </entry>
+  
+  <entry>
     <title><![CDATA[单例]]></title>
-    <link href="http://potatoker.github.io/2016/08/17/%E5%8D%95%E4%BE%8B/"/>
-    <id>http://potatoker.github.io/2016/08/17/单例/</id>
-    <published>2016-08-17T02:38:30.000Z</published>
-    <updated>2016-08-17T03:02:11.778Z</updated>
+    <link href="http://potatoker.github.io/2016/05/17/%E5%8D%95%E4%BE%8B/"/>
+    <id>http://potatoker.github.io/2016/05/17/单例/</id>
+    <published>2016-05-17T02:38:30.000Z</published>
+    <updated>2016-08-17T03:42:56.130Z</updated>
     <content type="html"><![CDATA[<p>最近复习，顺藤摸瓜的对一些java基础进行了巩固。</p>
 <a id="more"></a>
 <p>首先，在所有的解释中<a href="http://wuchong.me/blog/2014/08/28/how-to-correctly-write-singleton-pattern/" target="_blank" rel="external">如何正确地写出单例模式-黑桃夹克</a>是比较详细的，多有参考。</p>

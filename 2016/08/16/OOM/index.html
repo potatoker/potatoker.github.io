@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>图片OOM | RRRay</title>
+  <meta name="viewport" content="width=device-width">
+  <meta name="description" content="之前在超狗的测试中在中低端型机上遇到了图片问题造成的OOM，虽然最后还是用resize的方式解决的，这里还是整理一下当时遇到的一些问题。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="图片OOM">
+<meta property="og:url" content="http://potatoker.github.io/2016/08/16/OOM/index.html">
+<meta property="og:site_name" content="RRRay">
+<meta property="og:description" content="之前在超狗的测试中在中低端型机上遇到了图片问题造成的OOM，虽然最后还是用resize的方式解决的，这里还是整理一下当时遇到的一些问题。">
+<meta property="og:image" content="http://potatoker.github.io/images/fresco.png">
+<meta property="og:updated_time" content="2016-08-17T03:55:00.252Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="图片OOM">
+<meta name="twitter:description" content="之前在超狗的测试中在中低端型机上遇到了图片问题造成的OOM，虽然最后还是用resize的方式解决的，这里还是整理一下当时遇到的一些问题。">
+  
+    <link rel="alternative" href="/atom.xml" title="RRRay" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/bitbug_favicon.ico">
+  
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+</head>
+<body>
+  <div id="container">
+    <div class="mobile-nav-panel">
+	<i class="icon-reorder icon-large"></i>
+</div>
+<header id="header">
+	<h1 class="blog-title">
+		<a href="/">RRRay</a>
+	</h1>
+	<nav class="nav">
+		<ul>
+			<li><a href="/">Home</a></li><li><a href="/archives">Archives</a></li>
+			<li><a id="nav-search-btn" class="nav-icon" title="Search"></a></li>
+			<li><a href="/atom.xml" id="nav-rss-link" class="nav-icon" title="RSS Feed"></a></li>
+		</ul>
+	</nav>
+	<div id="search-form-wrap">
+		<form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://potatoker.github.io"></form>
+	</div>
+</header>
+    <div id="main">
+      <article id="post-OOM" class="post">
+	<footer class="entry-meta-header">
+		<span class="meta-elements date">
+			<a href="/2016/08/16/OOM/" class="article-date">
+  <time datetime="2016-08-16T01:20:30.000Z" itemprop="datePublished">2016-08-16</time>
+</a>
+		</span>
+		<span class="meta-elements author">RRRay</span>
+		<div class="commentscount">
+			
+				<a href="http://potatoker.github.io/2016/08/16/OOM/#disqus_thread" class="article-comment-link">Comments</a>
+			
+		</div>
+	</footer>
+	
+	<header class="entry-header">
+		
+  
+    <h1 class="article-title entry-title" itemprop="name">
+      图片OOM
+    </h1>
+  
+
+	</header>
+	<div class="entry-content">
+		
+    	<p>之前在超狗的测试中在中低端型机上遇到了图片问题造成的OOM，虽然最后还是用resize的方式解决的，这里还是整理一下当时遇到的一些问题。</p>
+<a id="more"></a> 
+<h2 id="u4E00_u4E2A_u4E8B_u5B9E_uFF1A"><a href="#u4E00_u4E2A_u4E8B_u5B9E_uFF1A" class="headerlink" title="一个事实："></a>一个事实：</h2><blockquote>
+<p>On Android 2.3.3 (API level 10) and lower, the backing pixel data for a bitmap is stored in native memory. It is separate from the bitmap itself, which is stored in the Dalvik heap. The pixel data in native memory is not released in a predictable manner, potentially causing an application to briefly exceed its memory limits and crash. As of Android 3.0 (API level 11), the pixel data is stored on the Dalvik heap along with the associated bitmap.</p>
+</blockquote>
+<h2 id="u4E0D_u540C_u7248_u672C_u5BF9bitmap_u5B58_u50A8_u7BA1_u7406_u7684_u4E0D_u540C_u5904_u7406_3A"><a href="#u4E0D_u540C_u7248_u672C_u5BF9bitmap_u5B58_u50A8_u7BA1_u7406_u7684_u4E0D_u540C_u5904_u7406_3A" class="headerlink" title="不同版本对bitmap存储管理的不同处理:"></a>不同版本对bitmap存储管理的不同处理:</h2><p> 首先，说一下Android 2.3–2.3.7 “Gingerbread”和其以后的android版本的区别:</p>
+<blockquote>
+<p>On Android Android 2.2 (API level 8) and lower, when garbage collection occurs, your app’s threads get stopped. This causes a lag that can degrade performance. Android 2.3 adds concurrent garbage collection, which means that the memory is reclaimed soon after a bitmap is no longer referenced.</p>
+<p>On Android 2.3.3 (API level 10) and lower, the backing pixel data for a bitmap is stored in native memory. It is separate from the bitmap itself, which is stored in the Dalvik heap. The pixel data in native memory is not released in a predictable manner, potentially causing an application to briefly exceed its memory limits and crash. As of Android 3.0 (API level 11), the pixel data is stored on the Dalvik heap along with the associated bitmap.</p>
+</blockquote>
+<p> 就是说，在android2.3.3之前，有关于bitmap的两个显著不同:</p>
+<h3 id="Android3-0_u4E4B_u524D_2Cbitmap_pixel_data_u5B58_u5728ashmem_u91CC_u9762"><a href="#Android3-0_u4E4B_u524D_2Cbitmap_pixel_data_u5B58_u5728ashmem_u91CC_u9762" class="headerlink" title="Android3.0之前,bitmap pixel data存在ashmem里面"></a>Android3.0之前,bitmap pixel data存在ashmem里面</h3><ol>
+<li>在android2.3.3之前，bitmap这个对象的存储，和bitmap pixel的存储是分开的！bitmap对象是存在heap上的(图的大小啊，pixel的位置信息等),然而真正的图像(pixel)是存储在ashmen里面的，属于native区域。我们知道java GC的原理是根据引用的GC root，可是你就会发现这里图像pixel压根不算做对象，也没有引用，他只是单纯的占用了一块内存区域，所以平常的GC root判断GC的方法对在ashmen里面的pixel来说没用，所以需要系统或者我们自己来对这块区域的内存做恰当的管理。</li>
+</ol>
+<h4 id="ahmem_u5230_u5E95_u662F_u4EC0_u4E48"><a href="#ahmem_u5230_u5E95_u662F_u4EC0_u4E48" class="headerlink" title="ahmem到底是什么"></a>ahmem到底是什么</h4><blockquote>
+<p>在Android系统中，提供了独特的匿名共享内存子系统Ashmem（Anonymous Shared Memory），它以驱动程序的形式实现在内核空间中。</p>
+</blockquote>
+<p> 原来asmem存在于内核空间，不属于任何一个单个jvm的一部分，但是，在查阅资料中发现:</p>
+<blockquote>
+<p>the GB Dalvik VM adds the sizes of both the Java and native heaps when determining if the app will exceed the max heap size for the app, which is device specific.</p>
+</blockquote>
+<p>也就是说系统也规定了这个process使用native区域的大小，要是和java heap加起来的大小来算OOM的。</p>
+<p>也就是说如果ashmem管理不当，也有可能会OOM,应该是非常可能发生OOM,因为正常的java gc方法在这块区域不被使用。</p>
+<p><a href="http://blog.csdn.net/luoshengyang/article/details/6664554" target="_blank" rel="external">Android系统匿名共享内存Ashmem（Anonymous Shared Memory）驱动程序源代码分析-罗升阳</a>介绍:</p>
+<blockquote>
+<p>它向Linux内存管理系统的内存回收算法注册接口，告诉Linux内存管理系统它的某些内存块不再使用了，可以被回收了，不过，这些不再使用的内存需要由它的使用者来告诉Ashmem驱动程序。通过这种用户-Ashmem驱动程序-内存管理系统三者的紧密合作，实现有效的内存管理机制，适合移动设备小内存的特点。</p>
+</blockquote>
+<h5 id="shmem_u5185_u5B58_u662F_u600E_u4E48_u88AB_u7BA1_u7406_u7684"><a href="#shmem_u5185_u5B58_u662F_u600E_u4E48_u88AB_u7BA1_u7406_u7684" class="headerlink" title="shmem内存是怎么被管理的"></a>shmem内存是怎么被管理的</h5><p>回到最开始的问题，那在2.3之前，系统是怎么判断清除ahsmem不用的内存的呢？</p>
+<p>看<a href="http://stackoverflow.com/questions/3823799/android-bitmap-recycle-how-does-it-work" target="_blank" rel="external">SO</a>的解释:</p>
+<blockquote>
+<p>I think the problem is this: On pre-Honeycomb versions of Android, the actual raw bitmap data is not stored in VM memory but in native memory instead. This native memory is freed when the corresponding java Bitmap object is GC’d.</p>
+<p>However, when you run out of native memory, the dalvik GC isn’t triggered, so it is possible that your app uses very little of the java memory, so the dalvik GC is never invoked, yet it uses tons of native memory for bitmaps which eventually causes an OOM error.</p>
+</blockquote>
+<p>我觉得系统默认的管理ahsmem中pixel的方式是，如果bitmap对象被GC了，那么对应的ashmem也被清除。</p>
+<p>看起来挺好的，可是有没有一种情况是，java heap里面空间很松散，有几个bitmap对象而已，即使这些bitmp对象被标记为可清除了，可是因为空间很足，GC<br>是很可能很长时间不会被触发的。可是asmeme中的区域可能已经被占用很大啊。那么OOM很可能会发生。</p>
+<p>那只能手动的去管理。有两个办法:</p>
+<ol>
+<li><p>调用Bitmap.recycle()<br> 这也是官网上说的办法:</p>
+<blockquote>
+<p>On Android 2.3.3 (API level 10) and lower, using recycle() is recommended. If you’re displaying large amounts of bitmap data in your app, you’re likely to run into OutOfMemoryError errors. The recycle() method allows an app to reclaim memory as soon as possible.</p>
+</blockquote>
+</li>
+<li><p>使用finalizer</p>
+</li>
+</ol>
+<blockquote>
+<p>The finalize method is called when an object is about to get garbage collected. That can be at any time after it has become eligible for garbage collection.</p>
+<p>finalize should only be used for cleanup of (usually non-Java) resources. And that’s exactly because the JVM doesn’t guarantee that finalize is ever called on any object.</p>
+</blockquote>
+<p>都是清除内存的方式。</p>
+<p>其实比较官方的还是用Bitmap.recycle(),要自定义实现使用引用计数法，去判断何时应该去recycle一个bitmap对象。这个是官网对于图片处理的例子。</p>
+<p>在2.3以下，不能靠GC root的方法去判断GC一个bitmap pixel，要人工的去使用引用计数法，使用recycle()函数去释放着块内存，非常的琐碎。人工的去进行内存管理可能出问题，其实这时候已经像C++一样去操作内存了。</p>
+<h3 id="Android_2-3_u4E4B_u524D_uFF0CGC_u65B9_u5F0F_u4E0D_u662Fcocurrent_GC"><a href="#Android_2-3_u4E4B_u524D_uFF0CGC_u65B9_u5F0F_u4E0D_u662Fcocurrent_GC" class="headerlink" title="Android 2.3之前，GC方式不是cocurrent GC"></a>Android 2.3之前，GC方式不是cocurrent GC</h3><p>再来看第二个:</p>
+<ol>
+<li>On Android Android 2.2 (API level 8) and lower, when garbage collection occurs, your app’s threads get stopped. This causes a lag that can degrade performance. Android 2.3 adds concurrent garbage collection, which means that the memory is reclaimed soon after a bitmap is no longer referenced.</li>
+</ol>
+<p>可以在JVM一篇回忆几种垃圾回收器。</p>
+<p>开始时没明白这里强调垃圾回收机制的变化和ashmem以及OOM有啥关系，他这里暗示说:</p>
+<blockquote>
+<p>which means that the memory is reclaimed soon after a bitmap is no longer referenced.</p>
+</blockquote>
+<p>拿到coccurent GC是即时回收的？如果是即时回收的话，确实可以作为2.2之前容易产生ashmem OOM的原因，因为还是上面那个例子，因为heap里面的不及时回收导致了ashmem的OOM，有了即时回收，就可以很大程度上解决GC卡顿或者OOM的问题。</p>
+<p>另外dalvik的 coccurent GC 垃圾回收算法采用的是标记清除算法(没错，最简单那种)，到了ART，则使用了标记整理，这些垃圾回收机制的升级都一定程度上缓解了OOM或者频繁GC的卡顿问题。</p>
+<h3 id="android3-0_u4EE5_u540E_28bitmap_u5B8C_u5168_u5728hava_heap_29_u7684_u95EE_u9898"><a href="#android3-0_u4EE5_u540E_28bitmap_u5B8C_u5168_u5728hava_heap_29_u7684_u95EE_u9898" class="headerlink" title="android3.0以后(bitmap完全在hava heap)的问题"></a>android3.0以后(bitmap完全在hava heap)的问题</h3><p>然而我们再来看一遍fresco的介绍:</p>
+<blockquote>
+<p>解压后的图片，即Android中的Bitmap，占用大量的内存。大的内存占用势必引发更加频繁的GC。在5.0以下，GC将会显著地引发界面卡顿。</p>
+<p>在5.0以下系统，Fresco将图片放到一个特别的内存区域。当然，在图片不显示的时候，占用的内存会自动被释放。这会使得APP更加流畅，减少因图片内存占用而引发的OOM。</p>
+</blockquote>
+<p>为什么特别提到了5.0以下呢,不是ashmem的问题在3.0中就已经解决了吗，3.0的时候不仅已经把pixel放到heap了，垃圾收集器也进化了，问题是不是算是解决了?</p>
+<h4 id="bimap_u5BF9_u8C61_u590D_u7528_u6765_u89E3_u51B3_u9891_u7E41GC"><a href="#bimap_u5BF9_u8C61_u590D_u7528_u6765_u89E3_u51B3_u9891_u7E41GC" class="headerlink" title="bimap对象复用来解决频繁GC"></a>bimap对象复用来解决频繁GC</h4><p>上面说了，bitmap太大的时候回引发频繁的GC，会造成系统卡顿，那么怎么解决呢?</p>
+<blockquote>
+<p>Android 3.0 (API level 11) introduces the BitmapFactory.Options.inBitmap field. If this option is set, decode methods that take the Options object will attempt to reuse an existing bitmap when loading content. This means that the bitmap’s memory is reused, resulting in improved performance, and removing both memory allocation and de-allocation</p>
+</blockquote>
+<p>哦，原来安卓官方搞了一个inBitmap的的option用来标记一个Bitmap对象是可被复用的，就像listview的convertview一样。这样就减少了GC，还减少了construction和desconstruction的时间。问题解决了。</p>
+<p>既然这样，fresco有何用?</p>
+<p>解释这个之前，先看这个:</p>
+<blockquote>
+<p>However, there are certain restrictions with how inBitmap can be used. In particular, before Android 4.4 (API level 19), only equal sized bitmaps are supported.</p>
+</blockquote>
+<p>原来是有限制的。重用的bitmap要有相同的大小，恩，就和listView里，重用的items layout结构也必须是一样的。</p>
+<p>也就是说4.4之前的都不太可能用好这个性质，bitmap还是会引发频繁的GC咯。</p>
+<p>这里概括几个版本对bitmap处理的问题:</p>
+<ol>
+<li>3.0之前<ol>
+<li>bitmap的pixel放在ashmem里面，属于native区域，pixel区域的回收需要heap里面bitmap对象的回收，然而由于GC的延迟性，即使bitmap不被需要，也不会被马上回收，bitmap对象是不叫小，但pixel很大，所以会造成OOM</li>
+<li>android 2.3之前，回收器不是cocurren GC，文档暗示说cocurrent GC会比较快的回收不需要的bitmap对象。所以2.3之前这个问题更严重。</li>
+</ol>
+</li>
+</ol>
+<ol>
+<li>4.4之前<br> bitmap的pixel也放到了java heap里面。虽然BitmapFactory.Options.inBitmap这个选项这可以对bitmap对象进行复用，减少频繁GC带来的卡顿，但是这个版本这一功能只可以对相同大小的bitmap对象复用，这无疑是一个很大的限制</li>
+</ol>
+<ol>
+<li>4.4之后<br> 4.4之后官方修复了只能对相同大小bitmap服用的的限制。</li>
+</ol>
+<p>所以可以看出来4.4之后已有的办法，才算是对Bitmap的存储做了一个比较好的处理.</p>
+<p>这也是为什么freso一直在针对5.0以下的版本在说。</p>
+<h2 id="fresco_u5BF9bitmap_u7684_u5904_u7406_u65B9_u5F0F"><a href="#fresco_u5BF9bitmap_u7684_u5904_u7406_u65B9_u5F0F" class="headerlink" title="fresco对bitmap的处理方式"></a>fresco对bitmap的处理方式</h2><p>那么fresco到底是怎么对5.0以下版本进行Bitmap存储优化的呢?</p>
+<p>还是看文档介绍的:</p>
+<blockquote>
+<p>在5.0以下系统，Fresco将图片放到一个特别的内存区域。当然，在图片不显示的时候，占用的内存会自动被释放。这会使得APP更加流畅，减少因图片内存占用而引发的OOM。</p>
+</blockquote>
+<p>加上之前的关于ashmem的介绍差不多可以理解了</p>
+<p>fresco使用的核心是使用了自定义Drawable类。这个类和ashmem中pixel data的管理息息相关，这里稍微扫了眼源码，这个类确实有采用引用计数法对其成员变量进行管理，这里应该就是图片数据的引用了。</p>
+<p>其实可以看到前面的ahmem的做法，无非就是有一个问题，就是当实际上这个bitmap pixel是不被需要的时候，系统自己是没办法马上就把ahsmem这部分给清除的。那只要我自己能够很快地清除他，不久完美解决了吗。</p>
+<p>所以我觉得fresco的思路是，他会把bitmap的pixel还是放在ashmem区域，但是和系统不一样的是，他会自己来好好地处理这一块区域，因为这一块区域是linux kernel 区域，应该是可以调用本地C++清除方式，比如上面的recycle应该就是一种C++的清除方式，可以立即清除，也许fresco就是用的recycle方法，或者使用native方法接口来做垃圾回收。</p>
+<p>另外fresco的这个好处我觉得也确实是他说的，使用一套方案解决了不同机型bitmap问题，否则要是真的按系统方法，必须要不停地去判断，然后采取对应这个系统版本的bitmap处理方法。</p>
+<h2 id="fresco_u7684_u7279_u70B9_u603B_u7ED3"><a href="#fresco_u7684_u7279_u70B9_u603B_u7ED3" class="headerlink" title="fresco的特点总结"></a>fresco的特点总结</h2><p>这里看一下fresco的特点</p>
+<ol>
+<li>三级缓存，当然其他的库很多也做到了</li>
+</ol>
+<p>一般的图片的比较完善的缓存机制:</p>
+<p><img src="/images/fresco.png" alt=""></p>
+<ol>
+<li>利用ashmem</li>
+</ol>
+<blockquote>
+<p>在5.0系统以下，Image Pipeline 使用`pinned purgeables*将Bitmap数据避开Java堆内存，存在ashmem中。这要求图片不使用时，要显式地释放内存。</p>
+<p>SimpleDraweeView 自动处理了这个释放过程，所以没有特殊情况，尽量使用SimpleDraweeView，在特殊的场合，如果有需要，也可以直接控制Image Pipeline。</p>
+</blockquote>
+
+    
+	</div>
+	<footer class="entry-footer">
+		<div class="entry-meta-footer">
+			<span class="category">
+				
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Android/">Android</a>
+  </div>
+
+			</span>
+			<span class="tags">
+				
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java，Android/">java，Android</a></li></ul>
+
+			</span>
+		</div>
+	</footer>
+	
+    
+<nav id="article-nav">
+  
+    <a href="/2016/08/17/Binder/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          浅析Binder机制
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/05/17/单例/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          单例
+        
+      </div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+
+
+<section id="comments">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+    </div>
+    <div class="mb-search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:potatoker.github.io">
+  </form>
+</div>
+<footer id="footer">
+	<h1 class="footer-blog-title">
+		<a href="/">RRRay</a>
+	</h1>
+	<span class="copyright">
+		&copy; 2016 RRRay<br>
+		Modify from <a href="http://sanographix.github.io/tumblr/apollo/" target="_blank">Apollo</a> theme, designed by <a href="http://www.sanographix.net/" target="_blank">SANOGRAPHIX.NET</a><br>
+		Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+	</span>
+</footer>
+    
+<script>
+  var disqus_shortname = 'RRRaysblog';
+  
+  var disqus_url = 'http://potatoker.github.io/2016/08/16/OOM/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js" type="text/javascript"></script>
+  </div>
+</body>
+</html>
