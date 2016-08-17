@@ -11,9 +11,7 @@
 现有条件： 
 
 一个需要akka跑的scala分布式程序。
-丧心病狂的来了，由于某种更加扭曲的实验方式的限制，最终实验必须要在一台g5上跑起来。
-
-恩，先压抑住吐槽">
+丧心病狂的来了，由于某种更加扭曲的实验方式的限制，最终实验必须要在一台g5上跑起来。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="scala on android">
 <meta property="og:url" content="http://potatoker.github.io/2015/12/23/scala-on-android/index.html">
@@ -24,11 +22,9 @@
 现有条件： 
 
 一个需要akka跑的scala分布式程序。
-丧心病狂的来了，由于某种更加扭曲的实验方式的限制，最终实验必须要在一台g5上跑起来。
-
-恩，先压抑住吐槽">
+丧心病狂的来了，由于某种更加扭曲的实验方式的限制，最终实验必须要在一台g5上跑起来。">
 <meta property="og:image" content="https://camo.githubusercontent.com/72417659473b911df7f1bd03359de67685783ae7/687474703a2f2f6f2d6e322e636f6d2f766572626f736553696d706c652e706e67">
-<meta property="og:updated_time" content="2015-12-24T22:14:04.563Z">
+<meta property="og:updated_time" content="2016-08-17T04:30:12.323Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="scala on android">
 <meta name="twitter:description" content="今天大概要宣布第一条路走不通了。
@@ -37,9 +33,7 @@
 现有条件： 
 
 一个需要akka跑的scala分布式程序。
-丧心病狂的来了，由于某种更加扭曲的实验方式的限制，最终实验必须要在一台g5上跑起来。
-
-恩，先压抑住吐槽">
+丧心病狂的来了，由于某种更加扭曲的实验方式的限制，最终实验必须要在一台g5上跑起来。">
   
     <link rel="alternative" href="/atom.xml" title="RRRay" type="application/atom+xml">
   
@@ -105,7 +99,6 @@
 <li>一个需要akka跑的scala分布式程序。</li>
 <li>丧心病狂的来了，由于某种更加扭曲的实验方式的限制，最终实验必须要在一台g5上跑起来。</li>
 </ol>
-<p>恩，先压抑住吐槽</p>
 <a id="more"></a>
 <h1 id="scala_on_android"><a href="#scala_on_android" class="headerlink" title="scala on android"></a>scala on android</h1><p> 经过搜索之后，发现在安卓平台上跑scala并不是什么新鲜事了，scala作为一门基于java虚拟机的语言，同样第一步需要预编译成class文件，然后打包成apk安装到android上，原理上是完全没有问题的。</p>
 <p>不过当时遇到的问题是，一般scala使用的build tool 是sbt，而我目前使用的IDE android studio使用的是gradle. 这样记得当时google出来的scala on android的一些插件或者套路基本根据这两种build tool来的。我也不知道该使用哪一种，因为实际上两种我都并没有很了解，似乎走了不少弯路。  </p>
@@ -126,15 +119,13 @@ You may try using --multi-dex option.
 <p>这东西有两个作用，一个是减小apk的大小，一个是对方法名进行混淆。我需要用到他的第一个作用，思路就是引用的库中，很多方法其实根本用不到，所以proguard就会帮助build tool把引用到的那一部分加入编译，这样就不会使dex文件过大。那么他是怎么判断哪些方法该被加入编译，哪些是没用的呢，这东西还没有那么智能。。需要一份rules来规定哪些方法和类是需要保存的，虽然sdk tool自带一份默认的rules，但是！一般情况还是需要debug一下，然后手动修改rules文件。如果是第三方的jar包，那就更没得跑了。</p>
 <p>其实在使用scala lib的时候并不需要这一步，因为之前提到过，直接使用作者已经配置好的<a href="https://github.com/saturday06/gradle-android-scala-plugin/tree/master/sample/simple" target="_blank" rel="external">sample</a>就可以了，不过这个sample使用的是第二种方法。但是如果想要使用progurad来解决这个问题也可以在网上找到现成的scala库的<a href="https://github.com/pocorall/hello-scaloid-gradle/blob/master/proguard-rules.txt" target="_blank" rel="external">proguard rule</a>,这个方法我也使用过，也可以成功跑通scala.</p>
 <p>scala这一块已经解决，然而。。akka似乎并没有提供这样一份东西。。详细的内容在后一篇。</p>
-<h3 id="2-_Use_MultiDex"><a href="#2-_Use_MultiDex" class="headerlink" title="2. Use MultiDex"></a>2. Use MultiDex</h3><p>事实上我使用的作者的sample 并没有使用proguard方法，而是使用 multidex。<br>解决思路就是，以前一个apk只有一个dex包，dex又有大小限制，那么我就吧class分成多个dex打包，使用不同dex中的class的时候采取某种调用机制。这样就不会超过这个限制。</p>
+<h3 id="2-_Use_MultiDex"><a href="#2-_Use_MultiDex" class="headerlink" title="2. Use MultiDex"></a>2. Use MultiDex</h3><p>事实上我使用的作者的sample 并没有使用proguard方法，而是使用 multidex。<br>解决思路就是，以前一个apk只有一个dex包，dex又有大小限制，那么我就吧class分成多个dex打包，使用不同dex中的class的时候就动态加载。这样就不会超过这个限制。</p>
 <p>官方解释：<br><blockquote><p>Versions of the platform prior to Android 5.0 use the Dalvik runtime for executing app code. By default, Dalvik limits apps to a single classes.dex bytecode file per APK. In order to get around this limitation, you can use the multidex support library, which becomes part of the primary DEX file of your app and then manages access to the additional DEX files and the code they contain. </p>
 <p>Android 5.0 and higher uses a runtime called ART which natively supports loading multiple dex files from application APK files.</p>
 </blockquote></p>
 <p>其实主要是在gradle的build文件中添加multidex方法的依赖库，然后修改一些关联的配置<br><figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">dependencies</span> &#123;</span><br><span class="line">  <span class="keyword">compile</span> <span class="string">'com.android.support:multidex:1.0.0'</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>  </p>
 <p>详细的内容太仍然在<a href="https://developer.android.com/tools/building/multidex.html#mdex-gradle" target="_blank" rel="external">Configuring Your App for Multidex with Gradle</a> 。</p>
 <p><strong>这里有非常重要的一点是multidex方法不能直接适用于低端机，我使用的是android 5.0device，在akka-on-andorid中我使用了multidex试图解决大型库依赖的问题，但会产生另外的问题。但是Android 2.3.7使用proguard之后是可以跑这个scala库的。</strong></p>
-<p>题外话：</p>
-<p>想起毕设的时候就用到过dex，不过仍然是懵懵懂懂，又是kd移动分布式任务处理。。。通过用sdk tool可以把jar转换成dex, 这样一个dex就是分块任务，从而方便任务的分发与调用。看到Multidex lib的机制就想到了这么一件事。</p>
 <h3 id="in_the_end"><a href="#in_the_end" class="headerlink" title="in the end"></a>in the end</h3><p>总结一下，在android上使用scala:</p>
 <ol>
 <li><p>根据IDE下载scala语言的parse插件，我在android studio中使用的是<a href="http://www.jetbrains.net/confluence/display/SCA/Scala+Plugin+for+IntelliJ+IDEA" target="_blank" rel="external">这款</a>。这样IDE可以识别scala.</p>

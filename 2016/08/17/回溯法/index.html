@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>回溯法 | RRRay</title>
+  <meta name="viewport" content="width=device-width">
+  <meta name="description" content="1.八皇后问题最常见的回溯法处理的问题之一
+首先，要理清最初始的框架就是，根据他的问题定义, 我们可以是一行一行来摆这个皇后保证不冲突同时思路清晰。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="回溯法">
+<meta property="og:url" content="http://potatoker.github.io/2016/08/17/回溯法/index.html">
+<meta property="og:site_name" content="RRRay">
+<meta property="og:description" content="1.八皇后问题最常见的回溯法处理的问题之一
+首先，要理清最初始的框架就是，根据他的问题定义, 我们可以是一行一行来摆这个皇后保证不冲突同时思路清晰。">
+<meta property="og:image" content="http://potatoker.github.io/images/bc.pic.jpg">
+<meta property="og:image" content="http://potatoker.github.io/images/Screen%20Shot%202016-08-11%20at%204.22.33%20PM.png">
+<meta property="og:image" content="http://potatoker.github.io/images/5.pic.jpg">
+<meta property="og:updated_time" content="2016-08-17T04:24:22.605Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="回溯法">
+<meta name="twitter:description" content="1.八皇后问题最常见的回溯法处理的问题之一
+首先，要理清最初始的框架就是，根据他的问题定义, 我们可以是一行一行来摆这个皇后保证不冲突同时思路清晰。">
+  
+    <link rel="alternative" href="/atom.xml" title="RRRay" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/bitbug_favicon.ico">
+  
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+</head>
+<body>
+  <div id="container">
+    <div class="mobile-nav-panel">
+	<i class="icon-reorder icon-large"></i>
+</div>
+<header id="header">
+	<h1 class="blog-title">
+		<a href="/">RRRay</a>
+	</h1>
+	<nav class="nav">
+		<ul>
+			<li><a href="/">Home</a></li><li><a href="/archives">Archives</a></li>
+			<li><a id="nav-search-btn" class="nav-icon" title="Search"></a></li>
+			<li><a href="/atom.xml" id="nav-rss-link" class="nav-icon" title="RSS Feed"></a></li>
+		</ul>
+	</nav>
+	<div id="search-form-wrap">
+		<form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://potatoker.github.io"></form>
+	</div>
+</header>
+    <div id="main">
+      <article id="post-回溯法" class="post">
+	<footer class="entry-meta-header">
+		<span class="meta-elements date">
+			<a href="/2016/08/17/回溯法/" class="article-date">
+  <time datetime="2016-08-17T04:21:30.000Z" itemprop="datePublished">2016-08-17</time>
+</a>
+		</span>
+		<span class="meta-elements author">RRRay</span>
+		<div class="commentscount">
+			
+				<a href="http://potatoker.github.io/2016/08/17/回溯法/#disqus_thread" class="article-comment-link">Comments</a>
+			
+		</div>
+	</footer>
+	
+	<header class="entry-header">
+		
+  
+    <h1 class="article-title entry-title" itemprop="name">
+      回溯法
+    </h1>
+  
+
+	</header>
+	<div class="entry-content">
+		
+    	<h2 id="1-_u516B_u7687_u540E_u95EE_u9898"><a href="#1-_u516B_u7687_u540E_u95EE_u9898" class="headerlink" title="1.八皇后问题"></a>1.八皇后问题</h2><p>最常见的回溯法处理的问题之一</p>
+<p>首先，要理清最初始的框架就是，根据他的问题定义, 我们可以是一行一行来摆这个皇后保证不冲突同时思路清晰。</p>
+<a id="more"></a> 
+<p>那么我们的问题就成了，在摆第i行的时候我应该把皇后放到0:8的哪个列呢？<br>摆之前我们对照已经摆过的部分来检查一下到底可不可以摆到这一列。</p>
+<p>可以说上面这个思路即使是一个没有学过编程的人拿到这个问题也应该想到的。我们的编程思路完全就是把上面这段话翻译了一下。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> GRID_SIZE = <span class="number">8</span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">placeQueens</span><span class="params">(<span class="keyword">int</span> row, Integer[] columns, ArrayList&lt;Integer[]&gt; results)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(row == GRID_SIZE)&#123;</span><br><span class="line">        results.add(columns.clone())</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> col = <span class="number">0</span>; i &lt; GRID_SIZE; i++)&#123;</span><br><span class="line">            <span class="keyword">if</span>(checkValid(columns, row, col))&#123;</span><br><span class="line">                columns[row] = col;</span><br><span class="line">                placeQueens(row+<span class="number">1</span>, columns, results);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;    </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里其实有些地方是需要稍作思考的，不过在这之前还是先看看checkValid</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">checkValid</span><span class="params">(Integer[] columns, <span class="keyword">int</span> row2, <span class="keyword">int</span> column2)</span></span>&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> row1 = <span class="number">0</span>; row1 &lt; row2; i++)&#123;</span><br><span class="line">        column1 = columns[i];</span><br><span class="line"></span><br><span class="line">        <span class="comment">//检查是否之前摆过相同的列</span></span><br><span class="line">        <span class="keyword">if</span>(column1 == column2)</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        <span class="comment">//检查左上角和右上角是否有对角线上的碰撞，可以翻译成这么一条简洁的语句。</span></span><br><span class="line">        <span class="keyword">if</span>(row2-row1 == Math.abs(column2-column1))</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果不理清怎么check啊，会觉得有好多情况。<br>不可以同行，不可以同列，不可以对角线，对角线还分好多种。</p>
+<p>还记得本来的思路框架吗，本来不就是说一行一行的摆的吗，我们在第一个函数里面就已经保证了绝对不可能同行。另外我们是从行数从小往大摆的，对角线出现的碰撞也只可能是左上角和右上角的碰撞。</p>
+<p>当然，其实对角线这个可以做数学变形，不论是哪个方向的对角线碰撞都可以简化为:</p>
+<pre><code>row2-row1 == Math.abs(column2-column1)
+</code></pre><p>哦，对了，还有虽然很简单，但是很重要的啊，checkValid的思路是针对你下一个要摆的那个位置的。</p>
+<p><code>checkValid(Integer[] columns, int row2, int column2)</code>就是你准备把下一个皇后摆在row2,column2，你现在要在columns里面已经摆过的(row &lt; row2)的位置里面去看看有没有那里摆过皇后会和我现在准备摆的这个(row2,column2)皇后发生碰撞。</p>
+<p>前面摆过的一定遵守这个规则，要对当前要摆的皇后进行check</p>
+<p>最后一个问题。</p>
+<p>看下面这个<a href="https://leetcode.com/problems/n-queens/" target="_blank" rel="external">leetcode</a>题的一个解:</p>
+<figure class="highlight processing"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">class Solution &#123;</span><br><span class="line">    <span class="keyword">public</span> List&lt;List&lt;<span class="keyword">String</span>&gt;&gt; solveNQueens(<span class="built_in">int</span> n) &#123;</span><br><span class="line">        List&lt;List&lt;<span class="keyword">String</span>&gt;&gt; res = <span class="keyword">new</span> ArrayList();</span><br><span class="line">        ArrayList&lt;<span class="keyword">String</span>&gt; cur = <span class="keyword">new</span> ArrayList();</span><br><span class="line">        StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">        <span class="keyword">for</span> (<span class="built_in">int</span> i = <span class="number">0</span>; i &lt; n; i++) sb.<span class="built_in">append</span>(<span class="string">'.'</span>);</span><br><span class="line">        <span class="keyword">for</span> (<span class="built_in">int</span> i = <span class="number">0</span>; i &lt; n; i++) cur.<span class="built_in">add</span>(sb.toString());</span><br><span class="line">        helper(n, <span class="number">0</span>, cur, res);</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> helper(<span class="built_in">int</span> n, <span class="built_in">int</span> row, ArrayList&lt;<span class="keyword">String</span>&gt; cur, List&lt;List&lt;<span class="keyword">String</span>&gt;&gt; res) &#123;</span><br><span class="line">        <span class="keyword">if</span> (row == n) &#123;</span><br><span class="line">            List&lt;<span class="keyword">String</span>&gt; toAdd = <span class="keyword">new</span> ArrayList();</span><br><span class="line">            <span class="keyword">for</span> (<span class="built_in">int</span> i = <span class="number">0</span>; i &lt; cur.<span class="built_in">size</span>(); i++) toAdd.<span class="built_in">add</span>(cur.<span class="built_in">get</span>(i));</span><br><span class="line">            res.<span class="built_in">add</span>(toAdd);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="built_in">int</span> j = <span class="number">0</span>; j &lt; n; j++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (isValid(n, cur, row, j)) &#123;</span><br><span class="line">                StringBuilder sb = <span class="keyword">new</span> StringBuilder(cur.<span class="built_in">get</span>(row));</span><br><span class="line">                sb.setCharAt(j, <span class="string">'Q'</span>);</span><br><span class="line">                cur.<span class="built_in">set</span>(row, sb.toString());</span><br><span class="line">                helper(n, row+<span class="number">1</span>, cur, res);</span><br><span class="line">                sb.setCharAt(j, <span class="string">'.'</span>);</span><br><span class="line">                <span class="comment">// cur.set(row, sb.toString());</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="built_in">boolean</span> isValid(<span class="built_in">int</span> n, ArrayList&lt;<span class="keyword">String</span>&gt; cur, <span class="built_in">int</span> row, <span class="built_in">int</span> col) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="built_in">int</span> i = <span class="number">0</span>; i &lt; row; i++) &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="built_in">int</span> j = <span class="number">0</span>; j &lt; n; j++) &#123;</span><br><span class="line">                <span class="keyword">if</span> (cur.<span class="built_in">get</span>(i).charAt(j) == <span class="string">'Q'</span> &amp;&amp; (j == col || Math.<span class="built_in">abs</span>(row-i) == Math.<span class="built_in">abs</span>(col-j))) <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>helper方法里面我有一行注释的语句。</p>
+<p>我递归的时候是把皇后摆在了当前row,j这个位置，现在递归返回，我回溯了。回到row-1这个地方然后尝试摆到j+1,</p>
+<p>上面这个就是所谓深度优先遍历，然后回溯的思想。</p>
+<p>所以注意到有一个想法是很直观的，上面这个用的是一个cur变量来保存棋盘上皇后的位置。我现在是从row回溯到row-1，递归返回，表明回到row-1，重新把row-1这一行的皇后换个列摆放。</p>
+<p>but</p>
+<p>在回溯之前我们就摆过row-1了，row-1这一行的某一列已经被置Q了(这里是置Q)，现在我们重新摆，所以要把之前摆的这个Q给他抹掉才行。</p>
+<p>but</p>
+<p>好像一开始上面写的那个没有这个”抹掉”的过程呢?</p>
+<p>发现其实有些人也似乎是没有关系这个步骤比如这个<a href="http://kekecv.com/2016/08/02/N-Queens%20%E5%85%AB%E7%9A%87%E5%90%8E%E9%97%AE%E9%A2%98/" target="_blank" rel="external">链接</a>他的解法是不需要抹掉，但是仍然写上去了，虽然不影响对错。</p>
+<p>其实这个跟存储皇后位置所使用的数据结构有关。你可以发现你</p>
+<ul>
+<li><p>第一个代码使用的是columns[i]==j表示第i行的皇后放在第j列这个含义。</p>
+</li>
+<li><p>第二个代码cur.get(i).charAt(j)==’Q’同样表示第i行的皇后放在j列。</p>
+</li>
+</ul>
+<p>如果是一维的，你可以发现每次你重新放row-1行的皇后到下一列这个操作是一个“复写”操作！它本身就会抹掉之前。</p>
+<p>因为实际上当你返回到row-1行去然后j+1，然后调用checkValid，这个时候其实row-1,j+1那个地方是有值的。</p>
+<p>不过这不影响什么，也许只是如果可视化之后这个地方会稍显得不那么符合逻辑，但是根本没有影响，因为我们又不和同一行的比较。</p>
+<hr>
+<p>然而，如果是二维的,那就很不一样了，如果你没有”抹掉”这个操作，那么你在回溯到row-1，重新设置j+1的时候，发现如果检查对了(其实仍然不会影响检查)，但是！你重新设置row-1,j+1的时候，之前的痕迹还留在cur状态数组里面！而如果使用columns[i]=j这样的话，会抹掉之前的值。所以他不需要人为的抹掉。</p>
+<hr>
+<p>所以，八皇后问题，其实要根据一些题目的额外条件来判断使用一维数组来保存状态还是用二位数组来保存状态会比较方便一点。</p>
+<p>如果使用二维数组，那么一定要有”回溯后的抹掉”操作.</p>
+<h2 id="2-__u65B9_u6CD5_u8BBA"><a href="#2-__u65B9_u6CD5_u8BBA" class="headerlink" title="2. 方法论"></a>2. 方法论</h2><p>很多问题可以理解为回溯问题，同样也有别的思路，如果没有整理回溯法的方法论，看到可能会是一些<a href="http://wuchong.me/blog/2014/07/28/permutation-and-combination-realize/" target="_blank" rel="external">聪明解法</a>。</p>
+<p>但如果能判定一个问题可以使用回溯来解决，基本上答案也就出来了</p>
+<p>这里有个<a href="https://discuss.leetcode.com/topic/46162/a-general-approach-to-backtracking-questions-in-java-subsets-permutations-combination-sum-palindrome-partioning" target="_blank" rel="external">leetcode</a>帖子整理了许多经典的回溯法。觉得很有用。</p>
+<h2 id="3-__u518D_u770B_u5168_u6392_u5217"><a href="#3-__u518D_u770B_u5168_u6392_u5217" class="headerlink" title="3. 再看全排列"></a>3. 再看全排列</h2><p>应该能感觉到全排列应该是最典型的回溯法应用之一了。</p>
+<p>之前全排列我理解的方法是递归的思想，abc，得到bc这个自问题的全排列，然后把a加进去。大概是这么个思路，是比较典型的递归思想，假设一个子问题已经得到了解决并得到了结果。</p>
+<figure class="highlight nimrod"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">class <span class="type">Solution</span>(<span class="keyword">object</span>):</span><br><span class="line">    def permute(self, nums):</span><br><span class="line">        <span class="string">"""</span><br><span class="line">        :type nums: List[int]</span><br><span class="line">        :rtype: List[List[int]]</span><br><span class="line">        """</span></span><br><span class="line">        <span class="literal">result</span> = []</span><br><span class="line">        <span class="keyword">if</span> len(nums) &lt;= <span class="number">1</span>:</span><br><span class="line">            <span class="literal">result</span>.append(nums)</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">result</span></span><br><span class="line">        </span><br><span class="line">        sub_permute = self.permute(nums[<span class="number">1</span>:])</span><br><span class="line">        <span class="keyword">for</span> list <span class="keyword">in</span> sub_permute:</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">for</span> i <span class="keyword">in</span> <span class="type">range</span>(<span class="number">0</span>,len(list)+<span class="number">1</span>):</span><br><span class="line">                </span><br><span class="line">                new_list = list[<span class="number">0</span>:i]+[nums[<span class="number">0</span>]]+list[i:]</span><br><span class="line">                </span><br><span class="line">                <span class="literal">result</span>.append(new_list)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">result</span></span><br></pre></td></tr></table></figure>
+<p>主要这个语句</p>
+<pre><code>new_list = list[0:i]+[nums[0]]+list[i:]
+</code></pre><p>就是在得到子串的全排列的情况下，把第一个元素再”安进去”</p>
+<p>==其实虽然回溯法用到了递归，可是觉得回溯的思想框架和传统递归还是有差别的，递归是在当前层用子问题的结果解决问题，然而回溯的思想是要想到好多层以后，这里就是决策树！==</p>
+<p>其实想想我们最原始的写一个字符串的全排列是怎么做的</p>
+<pre><code>abc
+</code></pre><ol>
+<li>第一个位置，可以放a或b或c,这里先放a（bc暂且记下）</li>
+<li>第一个位置放了a,第二个位置可以放b或c，这里先放b(c暂且记下)</li>
+<li>第二个位置放了b,第三个位置只能发c了。</li>
+<li>回到第2，第二个位置放c,这样第三个位置只能放b</li>
+<li>回到第1，第一个位置放b…..</li>
+</ol>
+<p>其实这个思考过程就是一个决策树的形成过程:<br><img src="/images/bc.pic.jpg" alt="bc.pi"></p>
+<p>顺带的八皇后其实也是一个决策树，</p>
+<p><img src="/images/Screen%20Shot%202016-08-11%20at%204.22.33%20PM.png" alt="Screen Shot 2016-08-11 at 4.22.33 P"></p>
+<p>好吧这里是我自己瞎写的一个回溯法的框架:</p>
+<figure class="highlight nimrod"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> backTracking(<span class="type">List</span> path, <span class="type">int</span> level)&#123;</span><br><span class="line">    //到达叶子</span><br><span class="line">    <span class="keyword">if</span>(level == somesize)</span><br><span class="line">        <span class="keyword">do</span> some thing to show the <span class="literal">result</span></span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="keyword">for</span> every possible selection i <span class="keyword">for</span> next level:</span><br><span class="line">            <span class="keyword">if</span>(checkValid(level,i))</span><br><span class="line">                path.add(i)</span><br><span class="line">                backTracking(path, level+<span class="number">1</span>)</span><br><span class="line">                path.remove(i)</span><br><span class="line">    &#125;    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>每次进入backTracking先看需不需要对当前这个Path进行操作</li>
+<li>枚举所有下一层可能的选择并把结果放入当前的path list,</li>
+<li>这个“可能”体现在有的时候要对一些情况进行过滤，比如，八皇后第i行的皇后要放在第几列呢?我们是可以根据path中，0~i列已经放了的位置来判断有些列是不可能作为第i行的放入位置的。之一看看上面那个columns数组，其实就是这里path的作用哦，记录当前层位置一斤走过的level的设置的所有值。</li>
+<li>path数组是会不断变化的，没一次变化就是一次对当前index level的取值的调整。如果这个path的数据结构是list，那么一定要有显示的path.remove(i)的操作。方便递归栈弹出后再相同的层直接添加另一个选择。</li>
+</ol>
+<p>直接看用回溯法做全排列的例子:(字符串没有重复元素)</p>
+<figure class="highlight zephir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">List</span>&lt;<span class="keyword">List</span>&lt;Integer&gt;&gt; permute(<span class="keyword">int</span>[] nums) &#123;</span><br><span class="line">   <span class="keyword">List</span>&lt;<span class="keyword">List</span>&lt;Integer&gt;&gt; <span class="keyword">list</span> = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">   <span class="comment">// Arrays.sort(nums); // not necessary</span></span><br><span class="line">   backtrack(<span class="keyword">list</span>, <span class="keyword">new</span> ArrayList&lt;&gt;(), nums);</span><br><span class="line">   <span class="keyword">return</span> <span class="keyword">list</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> void backtrack(<span class="keyword">List</span>&lt;<span class="keyword">List</span>&lt;Integer&gt;&gt; <span class="keyword">list</span>, <span class="keyword">List</span>&lt;Integer&gt; tempList, <span class="keyword">int</span> [] nums)&#123;</span><br><span class="line">   <span class="keyword">if</span>(tempList.size() == nums.length)&#123;</span><br><span class="line">      <span class="keyword">list</span>.add(<span class="keyword">new</span> ArrayList&lt;&gt;(tempList));</span><br><span class="line">   &#125; <span class="keyword">else</span>&#123;</span><br><span class="line">      <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; nums.length; i++)&#123; </span><br><span class="line">         <span class="keyword">if</span>(tempList.contains(nums[i])) <span class="keyword">continue</span>; <span class="comment">// element already exists, skip</span></span><br><span class="line">         tempList.add(nums[i]);</span><br><span class="line">         backtrack(<span class="keyword">list</span>, tempList, nums);</span><br><span class="line">         tempList.remove(tempList.size() - <span class="number">1</span>);</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注意到:</p>
+<ol>
+<li>tempList其实就是path的作用，nums里面自然是可选的数字了，当<code>tempList.size() == nums.length</code>当然说明走到了决策树的叶子结点，比如123全排列，自然当path里面都有3个值了，这个完整的path也就形成了。</li>
+<li>这里走到决策树的叶子结点的操作就是加到我们的结果列表里面，nothing special</li>
+<li>枚举里面其实也有对可能的下一层的取值的判断哦，就是<code>if(tempList.contains(nums[i])) continue;</code>如果和前面path中已有的元素重复，作为全排列肯定是在这一level是不可选的。</li>
+</ol>
+<p>所以可以看见这个也是刚好可以契合我们前面那个回溯法的模板的。是比较典型的全排列。我相信应该比上面那个普通递归的做法思路更简单些。</p>
+<h2 id="4-__u5B50_u96C6"><a href="#4-__u5B50_u96C6" class="headerlink" title="4. 子集"></a>4. 子集</h2><p>看<a href="https://leetcode.com/problems/subsets/" target="_blank" rel="external">leetcode</a>这一题，给出不重复的list[1,2,3]给出这个集合的所有字节</p>
+<p>这个看起来其实也是要给出一些组合序列嘛，和我们前面的全排列问题挺像的。</p>
+<p>不过马上会遇到困难，这里怎么感觉写不出到达决策树叶子的条件</p>
+<pre><code>if(level == somesize)
+        do some thing to show the result
+</code></pre><p>这个判断走到了决策树的叶子结点的语句</p>
+<p>没错，因为这里执行的”打印操作”或者说得到一个完整的”path”的时候并不一定出现在决策树的叶子结点。这里我们的决策树构造就要提前做一些”哪些是可选的选择”的工作。这里可以看到在走向叶子结点的过程中经历的所有路径都是valid的路径结果</p>
+<p>所以:</p>
+<figure class="highlight zephir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">List</span>&lt;<span class="keyword">List</span>&lt;Integer&gt;&gt; subsets(<span class="keyword">int</span>[] nums) &#123;</span><br><span class="line">    <span class="keyword">List</span>&lt;<span class="keyword">List</span>&lt;Integer&gt;&gt; <span class="keyword">list</span> = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    Arrays.sort(nums);</span><br><span class="line">    backtrack(<span class="keyword">list</span>, <span class="keyword">new</span> ArrayList&lt;&gt;(), nums, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">list</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> void backtrack(<span class="keyword">List</span>&lt;<span class="keyword">List</span>&lt;Integer&gt;&gt; <span class="keyword">list</span> , <span class="keyword">List</span>&lt;Integer&gt; tempList, <span class="keyword">int</span> [] nums, <span class="keyword">int</span> start)&#123;</span><br><span class="line">    <span class="keyword">list</span>.add(<span class="keyword">new</span> ArrayList&lt;&gt;(tempList));</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = start; i &lt; nums.length; i++)&#123;</span><br><span class="line">        tempList.add(nums[i]);</span><br><span class="line">        backtrack(<span class="keyword">list</span>, tempList, nums, i + <span class="number">1</span>);</span><br><span class="line">        tempList.remove(tempList.size() - <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>list是一个List的List，用来保存所有可能的path(path是一个list)</li>
+<li>tempList相当于我们的path</li>
+<li>这里的start其实蕴含了我们前面模板的<code>if(checkValid(level,i))</code>,比如在level0 选择了nums[1],之后，level[1]的选择只能是nums[2]及其之后元素。</li>
+</ol>
+<p>感觉子集这一题是稍微特殊一点的。如果一开始就能理清不重复子集的产生思路，就能画出那个决策树帮你直接给出所有答案，然后写出回溯就是很简单的事情了。</p>
+<p>既然这个有点难懂，那么再检验一下有没有真的搞懂子集，如果给出的全集有重复元素怎么办呢?<a href="https://leetcode.com/problems/subsets-ii/" target="_blank" rel="external">leetcode</a></p>
+<p>现要产生[1,2,2,3]的所有子集，还是画一下决策树:</p>
+<p><img src="/images/5.pic.jpg" alt="5.pi"></p>
+<p>注意看画x的要排除的选择的部分</p>
+<p>老实说我想了很久没有想到,觉得这个规律并不是很直观。。。</p>
+<p>x的特点是什么:</p>
+<p><code>if(i &gt; start &amp;&amp; nums[i] == nums[i-1]) continue;</code></p>
+<p>那么对比之前的其实也就加了这么一个checkvalid 选择的过滤:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> List&lt;List&lt;Integer&gt;&gt; subsetsWithDup(<span class="keyword">int</span>[] nums) &#123;</span><br><span class="line">    List&lt;List&lt;Integer&gt;&gt; <span class="built_in">list</span> = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    Arrays.sort(nums);</span><br><span class="line">    backtrack(<span class="built_in">list</span>, <span class="keyword">new</span> ArrayList&lt;&gt;(), nums, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">list</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">backtrack</span><span class="params">(List&lt;List&lt;Integer&gt;&gt; <span class="built_in">list</span>, List&lt;Integer&gt; tempList, <span class="keyword">int</span> [] nums, <span class="keyword">int</span> start)</span></span>&#123;</span><br><span class="line">    <span class="built_in">list</span>.add(<span class="keyword">new</span> ArrayList&lt;&gt;(tempList));</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = start; i &lt; nums.length; i++)&#123;</span><br><span class="line">        <span class="keyword">if</span>(i &gt; start &amp;&amp; nums[i] == nums[i-<span class="number">1</span>]) <span class="keyword">continue</span>; <span class="comment">// skip duplicates</span></span><br><span class="line">        tempList.add(nums[i]);</span><br><span class="line">        backtrack(<span class="built_in">list</span>, tempList, nums, i + <span class="number">1</span>);</span><br><span class="line">        tempList.remove(tempList.size() - <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125; </span><br><span class="line">```	</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="preprocessor">## <span class="number">5.</span> 树的回溯</span></span><br><span class="line"></span><br><span class="line">树的回溯简直就是本身就是决策树。。不过这里思考的时候，想的是，我现在要枚举下一level的可能的情况。枚举的有要么左子树，要么右子树。</span><br><span class="line"></span><br><span class="line">这个是之前做过的，copy过来:</span><br><span class="line"></span><br><span class="line"><span class="preprocessor">### <span class="number">5.1</span>  给定一棵二叉树，其中每个节点都含有一个数值，设计一个算法，打印结点数值总和等于某个给定值的所有路径，注意路径不一定非得从二叉树的根结点或叶结点开始或结束。</span></span><br><span class="line"></span><br><span class="line">看到这个“路径”这个词，你就应该明白这个很可能是用回溯法处理的。不过这里要弄清楚到底题中的路径一词指的是什么。</span><br><span class="line"></span><br><span class="line">也看到题中强调了:</span><br><span class="line"></span><br><span class="line">	路径不一定非得从根开始，在叶子结束。</span><br><span class="line">	</span><br><span class="line">	</span><br><span class="line">不在叶子结束，这个怎么有点像前面子集的问题。没错当不在叶子结点结束的时候，我们没有必要做如</span><br><span class="line"></span><br><span class="line">	八皇后的row==size的判断</span><br><span class="line">	或者全排列的templist == nums.length这种判断</span><br><span class="line"></span><br><span class="line">才算是有一个可用的path。</span><br><span class="line"></span><br><span class="line">可是这里又看到，不一定是在根节点开始？。。。这个之前可没遇到过。</span><br><span class="line">不过稍微变通一下就知道，如果我们正常写这个回溯，那么path里存的是根到当前结点路过的结点值。现在不一定要从根开始，而我们的path又是在增长的。那么我们从当前走到的层倒着把path里的值都加起来不就可以做出所有不定头不定尾的判断吗</span><br><span class="line"></span><br><span class="line">至于枚举的话，直接枚举左孩子和右孩子就可以了</span><br></pre></td></tr></table></figure>
+<p>public void findSum(TreeNode root, int[] path, int sum, int level){</p>
+<pre><code>if(root == null)
+    return null;
+
+path[level] = root.data;
+
+int temp = 0
+for(int i = level; i &gt;=0; i--){
+    temp += path[i];
+    if(temp == sum)
+        print(path, i, level);
+}
+
+findSum(root.left, path, sum, level+1);
+findSum(root.right, path, sum, level+1);
+//这里是回溯的体现，虽然在这一题里其实属于之前的八皇后提到的覆盖，但是这里书上也是着重强调了虽然可以没有这一句，但是记住要有这么一个逻辑操作是一个好习惯，毕竟有的时候确实需要这么一个&quot;抹掉&quot;操作。
+path[level]  = Integer.MIN_VALUE;
+</code></pre><p>}</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="preprocessor">## <span class="number">5.2</span> 路径限定在必须从根开始，在叶子结束</span></span><br><span class="line"> </span><br><span class="line">如果是这样的话:</span><br><span class="line"></span><br><span class="line"><span class="number">1.</span> 我们要有走到决策树的叶子节点的常规判断了</span><br><span class="line"><span class="number">2.</span> 没必要倒着判断了</span><br><span class="line"><span class="number">3.</span> 由于终点停在叶子结点(其实前面说的叶子结点是遇到的第一个null)，那么这里就要有可能选择判断了，这个选择判断也就是有没有子树而已</span><br></pre></td></tr></table></figure>
+<pre><code>public static void backTrackingTreeSum(TreeNode root, int sum, int current_sum, ArrayList&lt;TreeNode&gt; list){
+    list.add(root);
+    if(root.left == null &amp;&amp; root.right == null &amp;&amp; sum == current_sum){
+        System.out.println(&quot;a path found:&quot;);
+        for(TreeNode node : list)
+            System.out.print(node.val);
+        System.out.print(&quot;\n&quot;);
+    }
+        //其实这个也可以看做八皇后的valid判断了
+       if(root.left != null)
+           backTrackingTreeSum(root.left, sum, current_sum+root.val, list);
+       if(root.right != null)
+           backTrackingTreeSum(root.right, sum, current_sum+root.val, list);
+       list.remove(list.size()-1);
+   }
+</code></pre><p>```</p>
+
+    
+	</div>
+	<footer class="entry-footer">
+		<div class="entry-meta-footer">
+			<span class="category">
+				
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/general/">general</a>
+  </div>
+
+			</span>
+			<span class="tags">
+				
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java，basic/">java，basic</a></li></ul>
+
+			</span>
+		</div>
+	</footer>
+	
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2016/08/17/Binder/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          浅析Binder机制
+        
+      </div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+
+
+<section id="comments">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+    </div>
+    <div class="mb-search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:potatoker.github.io">
+  </form>
+</div>
+<footer id="footer">
+	<h1 class="footer-blog-title">
+		<a href="/">RRRay</a>
+	</h1>
+	<span class="copyright">
+		&copy; 2016 RRRay<br>
+		Modify from <a href="http://sanographix.github.io/tumblr/apollo/" target="_blank">Apollo</a> theme, designed by <a href="http://www.sanographix.net/" target="_blank">SANOGRAPHIX.NET</a><br>
+		Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+	</span>
+</footer>
+    
+<script>
+  var disqus_shortname = 'RRRaysblog';
+  
+  var disqus_url = 'http://potatoker.github.io/2016/08/17/回溯法/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js" type="text/javascript"></script>
+  </div>
+</body>
+</html>
