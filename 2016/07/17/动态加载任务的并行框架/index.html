@@ -3,17 +3,31 @@
 <head>
   <meta charset="utf-8">
   
-  <title>RRRay</title>
+  <title>动态加载任务并行框架 | RRRay</title>
   <meta name="viewport" content="width=device-width">
-  <meta name="description" content="magjor about my programming conclusion.">
-<meta property="og:type" content="website">
-<meta property="og:title" content="RRRay">
-<meta property="og:url" content="http://potatoker.github.io/index.html">
+  <meta name="description" content="项目已经过去很久了，虽然现在研究方向改变了很多，但是从毕设开始做这个到发现这个和目前流行的一些插件化原理很相似，这里再基于之前做的和之后学到的内容对动态加载做一个总结。
+先介绍本来这个项目的机制:
+
+并行框架采用了AKKA,目前已经实现了AKKA框架在Android平台上的运行了，但遇到了Mthod 64K的问题，使用multidex的方法在Android5.0的平台上得到了解决
+master向集">
+<meta property="og:type" content="article">
+<meta property="og:title" content="动态加载任务并行框架">
+<meta property="og:url" content="http://potatoker.github.io/2016/07/17/动态加载任务的并行框架/index.html">
 <meta property="og:site_name" content="RRRay">
-<meta property="og:description" content="magjor about my programming conclusion.">
+<meta property="og:description" content="项目已经过去很久了，虽然现在研究方向改变了很多，但是从毕设开始做这个到发现这个和目前流行的一些插件化原理很相似，这里再基于之前做的和之后学到的内容对动态加载做一个总结。
+先介绍本来这个项目的机制:
+
+并行框架采用了AKKA,目前已经实现了AKKA框架在Android平台上的运行了，但遇到了Mthod 64K的问题，使用multidex的方法在Android5.0的平台上得到了解决
+master向集">
+<meta property="og:image" content="http://potatoker.github.io/images/14691068206589.png">
+<meta property="og:updated_time" content="2016-08-17T07:16:48.702Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="RRRay">
-<meta name="twitter:description" content="magjor about my programming conclusion.">
+<meta name="twitter:title" content="动态加载任务并行框架">
+<meta name="twitter:description" content="项目已经过去很久了，虽然现在研究方向改变了很多，但是从毕设开始做这个到发现这个和目前流行的一些插件化原理很相似，这里再基于之前做的和之后学到的内容对动态加载做一个总结。
+先介绍本来这个项目的机制:
+
+并行框架采用了AKKA,目前已经实现了AKKA框架在Android平台上的运行了，但遇到了Mthod 64K的问题，使用multidex的方法在Android5.0的平台上得到了解决
+master向集">
   
     <link rel="alternative" href="/atom.xml" title="RRRay" type="application/atom+xml">
   
@@ -45,188 +59,7 @@
 	</div>
 </header>
     <div id="main">
-      
-  
-    <article id="post-回溯法" class="post">
-	<footer class="entry-meta-header">
-		<span class="meta-elements date">
-			<a href="/2016/08/17/回溯法/" class="article-date">
-  <time datetime="2016-08-17T04:21:30.000Z" itemprop="datePublished">2016-08-17</time>
-</a>
-		</span>
-		<span class="meta-elements author">RRRay</span>
-		<div class="commentscount">
-			
-				<a href="http://potatoker.github.io/2016/08/17/回溯法/#disqus_thread" class="article-comment-link">Comments</a>
-			
-		</div>
-	</footer>
-	
-	<header class="entry-header">
-		
-  
-    <h1 itemprop="name" class="entry-title">
-      <a class="article-title" href="/2016/08/17/回溯法/">回溯法</a>
-    </h1>
-  
-
-	</header>
-	<div class="entry-content">
-		
-			<h2 id="1-_u516B_u7687_u540E_u95EE_u9898"><a href="#1-_u516B_u7687_u540E_u95EE_u9898" class="headerlink" title="1.八皇后问题"></a>1.八皇后问题</h2><p>最常见的回溯法处理的问题之一</p>
-<p>首先，要理清最初始的框架就是，根据他的问题定义, 我们可以是一行一行来摆这个皇后保证不冲突同时思路清晰。</p>
-			
-				<p class="article-more-link">
-					<a href="/2016/08/17/回溯法/#more">more</a>
-				</p>
-      
-    
-	</div>
-	<footer class="entry-footer">
-		<div class="entry-meta-footer">
-			<span class="category">
-				
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/general/">general</a>
-  </div>
-
-			</span>
-			<span class="tags">
-				
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java，basic/">java，basic</a></li></ul>
-
-			</span>
-		</div>
-	</footer>
-	
-</article>
-
-
-	<hr class="article-devider">
-
-
-
-  
-    <article id="post-Binder" class="post">
-	<footer class="entry-meta-header">
-		<span class="meta-elements date">
-			<a href="/2016/08/17/Binder/" class="article-date">
-  <time datetime="2016-08-17T03:51:30.000Z" itemprop="datePublished">2016-08-17</time>
-</a>
-		</span>
-		<span class="meta-elements author">RRRay</span>
-		<div class="commentscount">
-			
-				<a href="http://potatoker.github.io/2016/08/17/Binder/#disqus_thread" class="article-comment-link">Comments</a>
-			
-		</div>
-	</footer>
-	
-	<header class="entry-header">
-		
-  
-    <h1 itemprop="name" class="entry-title">
-      <a class="article-title" href="/2016/08/17/Binder/">浅析Binder机制</a>
-    </h1>
-  
-
-	</header>
-	<div class="entry-content">
-		
-			<p>并没有找到讲binder机制特别清晰的中文资料</p>
-<p>终于在youtube上找到一个<a href="https://www.youtube.com/watch?v=Jgampt1DOak">演讲</a>和<a href="http://events.linuxfoundation.org/images/stories/slides/abs2013_gargentas.pdf">slides</a>,以及<a href="https://www.nds.rub.de/media/attachments/files/2012/03/binder.pdf">这篇</a>资料作为补充，从更全面的角度介绍了更细致的前因后果的</p>
-			
-				<p class="article-more-link">
-					<a href="/2016/08/17/Binder/#more">more</a>
-				</p>
-      
-    
-	</div>
-	<footer class="entry-footer">
-		<div class="entry-meta-footer">
-			<span class="category">
-				
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Android/">Android</a>
-  </div>
-
-			</span>
-			<span class="tags">
-				
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java，Android/">java，Android</a></li></ul>
-
-			</span>
-		</div>
-	</footer>
-	
-</article>
-
-
-	<hr class="article-devider">
-
-
-
-  
-    <article id="post-OOM" class="post">
-	<footer class="entry-meta-header">
-		<span class="meta-elements date">
-			<a href="/2016/08/16/OOM/" class="article-date">
-  <time datetime="2016-08-16T01:20:30.000Z" itemprop="datePublished">2016-08-16</time>
-</a>
-		</span>
-		<span class="meta-elements author">RRRay</span>
-		<div class="commentscount">
-			
-				<a href="http://potatoker.github.io/2016/08/16/OOM/#disqus_thread" class="article-comment-link">Comments</a>
-			
-		</div>
-	</footer>
-	
-	<header class="entry-header">
-		
-  
-    <h1 itemprop="name" class="entry-title">
-      <a class="article-title" href="/2016/08/16/OOM/">图片OOM</a>
-    </h1>
-  
-
-	</header>
-	<div class="entry-content">
-		
-			<p>之前在超狗的测试中在中低端型机上遇到了图片问题造成的OOM，虽然最后还是用resize的方式解决的，这里还是整理一下当时遇到的一些问题。</p>
-			
-				<p class="article-more-link">
-					<a href="/2016/08/16/OOM/#more">more</a>
-				</p>
-      
-    
-	</div>
-	<footer class="entry-footer">
-		<div class="entry-meta-footer">
-			<span class="category">
-				
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/Android/">Android</a>
-  </div>
-
-			</span>
-			<span class="tags">
-				
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java，Android/">java，Android</a></li></ul>
-
-			</span>
-		</div>
-	</footer>
-	
-</article>
-
-
-	<hr class="article-devider">
-
-
-
-  
-    <article id="post-动态加载任务的并行框架" class="post">
+      <article id="post-动态加载任务的并行框架" class="post">
 	<footer class="entry-meta-header">
 		<span class="meta-elements date">
 			<a href="/2016/07/17/动态加载任务的并行框架/" class="article-date">
@@ -244,8 +77,8 @@
 	<header class="entry-header">
 		
   
-    <h1 itemprop="name" class="entry-title">
-      <a class="article-title" href="/2016/07/17/动态加载任务的并行框架/">动态加载任务并行框架</a>
+    <h1 class="article-title entry-title" itemprop="name">
+      动态加载任务并行框架
     </h1>
   
 
@@ -497,78 +330,41 @@ Object1 object_reload = myObjectClass2.newInstance()
 		</div>
 	</footer>
 	
-</article>
-
-
-	<hr class="article-devider">
-
-
-
-  
-    <article id="post-单例" class="post">
-	<footer class="entry-meta-header">
-		<span class="meta-elements date">
-			<a href="/2016/05/17/单例/" class="article-date">
-  <time datetime="2016-05-17T02:38:30.000Z" itemprop="datePublished">2016-05-17</time>
-</a>
-		</span>
-		<span class="meta-elements author">RRRay</span>
-		<div class="commentscount">
-			
-				<a href="http://potatoker.github.io/2016/05/17/单例/#disqus_thread" class="article-comment-link">Comments</a>
-			
-		</div>
-	</footer>
-	
-	<header class="entry-header">
-		
-  
-    <h1 itemprop="name" class="entry-title">
-      <a class="article-title" href="/2016/05/17/单例/">单例</a>
-    </h1>
-  
-
-	</header>
-	<div class="entry-content">
-		
-			<p>最近复习，顺藤摸瓜的对一些java基础进行了巩固。</p>
-			
-				<p class="article-more-link">
-					<a href="/2016/05/17/单例/#more">more</a>
-				</p>
-      
     
-	</div>
-	<footer class="entry-footer">
-		<div class="entry-meta-footer">
-			<span class="category">
-				
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/java/">java</a>
-  </div>
+<nav id="article-nav">
+  
+    <a href="/2016/08/16/OOM/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          图片OOM
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/05/17/单例/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">
+        
+          单例
+        
+      </div>
+    </a>
+  
+</nav>
 
-			</span>
-			<span class="tags">
-				
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java，basic/">java，basic</a></li></ul>
-
-			</span>
-		</div>
-	</footer>
-	
+  
 </article>
 
 
-	<hr class="article-devider">
 
 
-
-  
-  
-    <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
-    </nav>
-  
+<section id="comments">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
 
     </div>
     <div class="mb-search">
@@ -591,11 +387,13 @@ Object1 object_reload = myObjectClass2.newInstance()
 <script>
   var disqus_shortname = 'RRRaysblog';
   
+  var disqus_url = 'http://potatoker.github.io/2016/07/17/动态加载任务的并行框架/';
+  
   (function(){
     var dsq = document.createElement('script');
     dsq.type = 'text/javascript';
     dsq.async = true;
-    dsq.src = '//go.disqus.com/count.js';
+    dsq.src = '//go.disqus.com/embed.js';
     (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
   })();
 </script>
