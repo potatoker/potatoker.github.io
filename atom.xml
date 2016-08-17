@@ -4,7 +4,7 @@
   
   <link href="/atom.xml" rel="self"/>
   <link href="http://potatoker.github.io/"/>
-  <updated>2016-01-09T13:13:17.236Z</updated>
+  <updated>2016-08-17T02:52:41.480Z</updated>
   <id>http://potatoker.github.io/</id>
   
   <author>
@@ -13,6 +13,151 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title><![CDATA[单例]]></title>
+    <link href="http://potatoker.github.io/2016/08/17/%E5%8D%95%E4%BE%8B/"/>
+    <id>http://potatoker.github.io/2016/08/17/单例/</id>
+    <published>2016-08-17T02:38:30.000Z</published>
+    <updated>2016-08-17T02:52:41.480Z</updated>
+    <content type="html"><![CDATA[<p>最近复习，顺藤摸瓜的对一些java基础进行了巩固。</p>
+<a id="more"></a>
+<p>首先，在所有的解释中<a href="http://wuchong.me/blog/2014/08/28/how-to-correctly-write-singleton-pattern/" target="_blank" rel="external">如何正确地写出单例模式-黑桃夹克</a>是比较详细的，多有参考。</p>
+<p>首先单例分为懒汉式和饿汉式</p>
+<p>分类的区别在于:</p>
+<p>懒汉式:单例是在需要的时候才会被初始化(相对饿汉式来说初始化被推迟了，所以称为”懒汉式”)<br>饿汉式:单例在类被加载的会后就被初始化</p>
+<p>另外，不同的实现又分为线程安全和线程不安全:</p>
+<p>目前来讲，实现线程安全的方式，就是使用synchronized关键字。<br>为什么线程安全要被提出，因为，作为单例，程序里只有一个实例，那么如果这是一个多线程的程序的话，很容易出现多线程同时访问同一个实例的同步问题。</p>
+<p>##1. 懒汉式，线程不安全</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton instance;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span> <span class="params">()</span></span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">     <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">         instance = <span class="keyword">new</span> Singleton();</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到是通过调用<code>getInstance</code>的时候才初始化的，同时，要在调用的时候检验单例是否初始化，如果已经初始过，自然不需要初始化。</p>
+<p>##2. 懒汉式，线程安全<br>然而上面的是线程不安全的，所有线程可以同时拿到单例，并进行操作，这种同时操作如果有需要同步的写操作的话，自然会造成紊乱。</p>
+<p>那么这里很简单的想法，就是把这个<code>getInstance</code>函数变成线程同步的。这样就不允许多个线程同时拿到单例的情况发生了</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">synchronized</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">        instance = <span class="keyword">new</span> Singleton();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> instance;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>##3. 懒汉式，线程安全，双重检验锁</p>
+<p>然而上面的最简单的懒汉式有个问题，就是很有可能有一种情况，就是，其实是允许大家同时对单例进行读或写的操作的，最典型的例子，是volley，大家只是想拿到单例往里面的队列放任务而已，而入队操作本来就允许多个线程同时执行啊。</p>
+<p>所以这种需求下，我唯一需要同步的部分是<code>getInstance</code>函数里面，当我要进行单例初始化操作的时候，这个操作肯定是需要同步的。</p>
+<p>那么就有了双重检验锁的诞生:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getSingleton</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;                         <span class="comment">//Single Checked</span></span><br><span class="line">        <span class="keyword">synchronized</span> (Singleton.class) &#123;</span><br><span class="line">            <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;                 <span class="comment">//Double Checked</span></span><br><span class="line">                instance = <span class="keyword">new</span> Singleton();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> instance ;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先，复习一下<code>synchronized (Singleton.class)</code>,如果要同步整个成员函数，那么synchronized的内部锁其实是<code>this</code>，可是如果要同步一个静态函数(没有this调用),那么内部锁是类对象，即<code>Singleton.class</code></p>
+<p>####volatile关键字</p>
+<p>然而，这个程序是不完全的！！！</p>
+<p>错误点的解释:</p>
+<ol>
+<li>初始化一个对象的操作并不是在一瞬间完成的，他是由多条指令构成的</li>
+<li>java中的语句可能是由多条指令构成的，然而编译器可能对这一条语句对应的多条指令进行指令重排进行执行优化</li>
+<li>在上面的程序里，考虑一种情况：线程1第一个调用getSingleton,由他来进行初始化，然而这个初始化过程，包括给(1)给Singleton在heap中划分空间，把地址传给引用(2)初始化其成员变量…等等，</li>
+<li>有可能是引用已经不为空，但是实际上对象还没有初始化好的情况。在这个时间点，如果有线程2来调用Singleton，他会发现引用已经不为空，不会进入同步的初始化单例的语句，而是直接读这个单例了，但实际上这个单例根本还没被初始化好。</li>
+</ol>
+<p>网上基本上解释为指令重排带来的错误，我这里觉得有可能是分配引用和真正construct这块引起的问题。</p>
+<p>那么解决办法是?<br><strong>使用volatile关键字标识对象</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">volatile</span> <span class="keyword">static</span> Singleton instance; <span class="comment">//声明成 volatile</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span> <span class="params">()</span></span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getSingleton</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;                         </span><br><span class="line">            <span class="keyword">synchronized</span> (Singleton.class) &#123;</span><br><span class="line">                <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;       </span><br><span class="line">                    instance = <span class="keyword">new</span> Singleton();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>volitile关键字会保证该变量的操作一定是满足happens-before原则</p>
+<p>通过保证:</p>
+<ol>
+<li>所有线程的读写都是在main memory进行，不会是在cache中进行</li>
+<li>对该变量的操作屏蔽了指令重排</li>
+</ol>
+<p><a href="http://stackoverflow.com/questions/11639746/what-is-the-point-of-making-the-singleton-instance-volatile-while-using-double-l" target="_blank" rel="external">SO</a><br>中的解释</p>
+<blockquote>
+<p>The volatile prevents memory writes from being re-ordered, making it impossible for other threads to read uninitialized fields of your singleton through the singleton’s pointer.</p>
+<p>Consider this situation: thread A discovers that uniqueInstance == null, locks, confirms that it’s still null, and calls singleton’s constructor. The constructor makes a write into member XYZ inside Singleton, and returns. Thread A now writes the reference to the newly created singleton into uniqueInstance, and gets ready to release its lock.</p>
+<p>Just as thread A gets ready to release its lock, thread B comes along, and discovers that uniqueInstance is not null. Thread B accesses uniqueInstance.XYZ thinking that it has been initialized, but because the CPU has reordered writes, the data that thread A has written into XYZ has not been made visible to thread B. Therefore, thread B sees an incorrect value inside XYZ, which is wrong.</p>
+<p>When you mark uniqueInstance volatile, a memory barrier is inserted. All writes initiated prior to that of uniqueInstance will be completed before the uniqueInstance is modified, preventing the reordering situation described above.</p>
+</blockquote>
+<p>这里说的就是先分配引用再初始化的问题，这里看到了网上的另外一些更explicit的<a href="http://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html" target="_blank" rel="external">说法</a>:</p>
+<blockquote>
+<p>As you can see, the assignment to singletons[i].reference is performed before the constructor for Singleton is called. This is completely legal under the existing Java memory model, and also legal in C and C++ (since neither of them have a memory model).</p>
+</blockquote>
+<p>##4. 饿汉式 static final field</p>
+<p>上面的懒汉式由于是推迟构造，构造这个动作要是同步的，同时读写又可能不需要同步，造成了上面那些麻烦的事情。</p>
+<p>这里饿汉式就是直接把单例设为静态变量，单例的初始化是在类被加载的时候(虽然类被加载可能是由线程调用getInstance触发的)，是由jVM去完成的，而不是线程。所以线程间的初始化单例的动作是线程安全的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span></span>&#123;</span><br><span class="line">    <span class="comment">//类加载时就初始化</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Singleton instance = <span class="keyword">new</span> Singleton();</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里复习一下几个东西:</p>
+<ol>
+<li>什么时候一个类会被load</li>
+<li>什么时候一个类中的static field会被初始化</li>
+<li>为什么这里单例作为static field初始化时线程安全的?</li>
+</ol>
+<p>####对于1 ：什么时候一个类会被load</p>
+<p><a href="http://www.programcreek.com/2013/01/when-and-how-a-java-class-is-loaded-and-initialized/" target="_blank" rel="external">这篇文章</a>有详细说明</p>
+<blockquote>
+<p>We can see the difference highlighted in red. A.class is loaded only when it is used. In summary, a class is loaded:</p>
+<ul>
+<li>when the new bytecode is executed. For example, SomeClass f = new SomeClass();</li>
+<li>when the bytecodes make a static reference to a class. For example, System.out.</li>
+</ul>
+</blockquote>
+<p>其实就是之前操作系统复习到的动态加载，这样才算作节省资源并且合理分配资源。</p>
+<p>####对于2：什么时候一个类中的static field会被初始化</p>
+<p>首先，类的成员变量，或者说实例的成员变量，什么时候被初始化，被new的时候啊。这个不用多说，那么，主要的问题就在这个静态变量.</p>
+<blockquote>
+<p>After class loading, initialization of class takes place which means initializing all static members of class.</p>
+</blockquote>
+<p><a href="http://stackoverflow.com/questions/3499214/when-does-static-class-initialization-happen" target="_blank" rel="external">这篇SO</a>和<a href="http://javarevisited.blogspot.com/2012/07/when-class-loading-initialization-java-example.html" target="_blank" rel="external">这篇</a>有个很官方的说法</p>
+<blockquote>
+<p>A classes static initialization normally happens immediately before the first time one of the following events occurs:</p>
+<ul>
+<li>an instance of the class is created,</li>
+<li>a static method of the class is invoked,</li>
+<li>a static field of the class is assigned,</li>
+<li>an static field of class is used which is not a constant variable.</li>
+<li>for a top-level class, an assert statement lexically nested within the class is executed.</li>
+</ul>
+</blockquote>
+<p>这不也就是动态加载那一套吗嘛.总结一下就是，<br><strong>类中的静态变量是在用到这个静态变量的时候才会被初始化的</strong></p>
+<p>这个初始化包括这个静态变量所在类的加载，和这个静态变量的初始化。</p>
+<p><a href="http://stackoverflow.com/questions/2007666/in-what-order-do-static-initializer-blocks-in-java-run" target="_blank" rel="external">这篇SO</a>的答案就是说的这样干脆:</p>
+<blockquote>
+<p>The static initializer for a class gets run when the class is first accessed, either to create an instance, or to access a static method or field.So, for multiple classes, this totally depends on the code that’s run to cause those classes to get loaded.</p>
+</blockquote>
+<p>所以很不严谨的用人话回答上面的那个问题:</p>
+<ol>
+<li>类被用于创建实例(new)或用到了成员变量的时候，反正就是被使用的时候</li>
+<li>类被加载的时候</li>
+</ol>
+<p>最后最后回到我们的饿汉式。</p>
+<p>看完了上面这些，我就会发现，这个单例作为static field，那么只有当我用到这个静态单例变量的时候才会被初始化，这不就是我们想要吗?</p>
+<p>如果你的单例类，真的<strong>只有</strong>上面写的那一部分。确实，这个饿汉式就是lazy mode，即用即初始化。</p>
+<p>but,你可能还有别的静态变量，别的静态函数在这个单例类里面啊。</p>
+<p>而只要<strong>任何一个</strong>静态field被用到了，这个类就会被load，这个类一被load,那这个类的<strong>所有</strong>静态变量都会被初始化！！</p>
+<p><a href="http://stackoverflow.com/questions/7790185/singleton-lazy-vs-eager-instantiation" target="_blank" rel="external">这篇SO</a>就是说明了这个问题</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Logger</span> </span>&#123;     </span><br><span class="line">   <span class="keyword">private</span> <span class="keyword">static</span> Logger instance = <span class="keyword">new</span> Logger(); </span><br><span class="line">   <span class="keyword">public</span> <span class="keyword">static</span> String LOG_LINE_SEPERATOR =  </span><br><span class="line">      System.getProperty(<span class="string">"line.separator"</span>);</span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Logger <span class="title">getInstance</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">          <span class="keyword">return</span> instance;     </span><br><span class="line">   &#125; </span><br><span class="line"></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">logPattern</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Logger.LOG_LINE_SEPERATOR; <span class="comment">// load Logger instance or</span></span><br><span class="line">Logger.logPattern(); <span class="comment">// load Logger instance</span></span><br></pre></td></tr></table></figure>
+<p>他这里就演示了一段有其他静态变量的单例类，然后就发现，用到这个Looger静态变量的时候，单例也被初始化了，这就不是懒汉式了，因为我们此时并不需要单例。</p>
+<h4 id="u5BF9_u4E8E3_uFF0C_u4E3A_u4EC0_u4E48_u5355_u4F8B_u4F5C_u4E3Astatic_field_u88AB_u521D_u59CB_u5316_u7684_u65F6_u5019_u662F_u7EBF_u7A0B_u5B89_u5168_u7684_28_u6211_u4EEC_u81EA_u5DF1_u6CA1_u6709_u5BF9_u8FD9_u4E2A_u52A8_u4F5C_u8FDB_u884C_u540C_u6B65_u64CD_u4F5C_29"><a href="#u5BF9_u4E8E3_uFF0C_u4E3A_u4EC0_u4E48_u5355_u4F8B_u4F5C_u4E3Astatic_field_u88AB_u521D_u59CB_u5316_u7684_u65F6_u5019_u662F_u7EBF_u7A0B_u5B89_u5168_u7684_28_u6211_u4EEC_u81EA_u5DF1_u6CA1_u6709_u5BF9_u8FD9_u4E2A_u52A8_u4F5C_u8FDB_u884C_u540C_u6B65_u64CD_u4F5C_29" class="headerlink" title="对于3，为什么单例作为static field被初始化的时候是线程安全的(我们自己没有对这个动作进行同步操作)"></a>对于3，为什么单例作为static field被初始化的时候是线程安全的(我们自己没有对这个动作进行同步操作)</h4><p>因为虚拟机初始化这些静态变量的时候会自动给他们加锁，所以一定是线程安全的</p>
+<blockquote>
+<p>VM runs static initializer blocks and set defaults values for the static fields. This phase uses a special VM lock, one per class or interface, and is what makes singletons thread-safe</p>
+</blockquote>
+<h2 id="5-__u9759_u6001_u5185_u90E8_u7C7B_static_nested_class"><a href="#5-__u9759_u6001_u5185_u90E8_u7C7B_static_nested_class" class="headerlink" title="5. 静态内部类 static nested class"></a>5. 静态内部类 static nested class</h2><p>好了，看完了上面的，其实我们想要的就是线程安全的，同时是懒汉式初始化的一种单例的实现。目前能够达到这两点的只有double check，但那个方法真的看起来非常不elegent.并且对java版本有要求。</p>
+<p>而只有这个方法，我觉的是满足上面两个需求，并且是懒汉式的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">SingletonHolder</span> </span>&#123;  </span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Singleton INSTANCE = <span class="keyword">new</span> Singleton();  </span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span> <span class="params">()</span></span>&#123;&#125;  </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">        <span class="keyword">return</span> SingletonHolder.INSTANCE; </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对比上面的饿汉式，其实在单例初始化的线程安全这一点都是用静态变量在类装载时初始化这个原理来保证的。</p>
+<p>先看一个问题:</p>
+<hr>
+<h4 id="u5185_u90E8_u7C7B_u7684load_u662F_u5728_u4EC0_u4E48_u65F6_u5019_u53D1_u751F_u7684"><a href="#u5185_u90E8_u7C7B_u7684load_u662F_u5728_u4EC0_u4E48_u65F6_u5019_u53D1_u751F_u7684" class="headerlink" title="内部类的load是在什么时候发生的"></a>内部类的load是在什么时候发生的</h4><p>答案是，不管是静态内部类还是非静态内部类他们的Load时机完全和上面通用的类的加载是一样的.</p>
+<p><a href="http://stackoverflow.com/questions/25192561/when-is-a-static-nested-class-and-static-members-therein-loaded-into-memory" target="_blank" rel="external">这篇SO</a>阐述了相同的疑问:</p>
+<blockquote>
+<p>There is nothing particularly special about static nested classes. They are loaded the same way as non static and/or non nested classes. To the JVM, all classes are the same and it doesn’t really understand nesting the way Java does</p>
+</blockquote>
+<p>那我们就知道，虽然SingletonHolder是个Singleton的内部类，但它和普通的类没什么不同，即使Singleton被load了，被初始化了，跟SingletonHolder没一点关系，SingletonHolder跟Singleton唯一的关系是，这个类的表示方式是:<br><code>Singleton$SingletonHolder</code></p>
+<p>而静态内部类和非静态内部类唯一的区别是非静态内部类含有外部类实例的引用。这里我们根本不需要用到这个，而且混乱了逻辑，所以只用静态内部类。</p>
+<hr>
+<p><em>那么怎么实现初始化的lazy mode的呢?</em></p>
+<p>上面饿汉式之所以不满足逻辑上的Lazy mode,是因为你不能保证单例类只有他那一个静态变量或者静态函数。</p>
+<p>好，既然单例类可能要有别的静态变量，那我就为你这个单例实例单独创建一个类，保证这个类只有单例你一个静态变量，并且只有外面单例类的<code>getInstance</code>会用到这个静态变量(单例)。</p>
+<p>这样就保证了，即使单例类有各种乱起八糟其他的静态变量啊，静态函数啊，随便用，都不会影响到单例的初始化，只有完完全全符合我们真正需求的<code>getInstance</code>会触发这个静态内部类的load以及其中单例的初始化。至此完美的达成了即用即初始化的想法。</p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p>最近复习，顺藤摸瓜的对一些java基础进行了巩固。</p>]]>
+    
+    </summary>
+    
+      <category term="java，basic" scheme="http://potatoker.github.io/tags/java%EF%BC%8Cbasic/"/>
+    
+      <category term="java" scheme="http://potatoker.github.io/categories/java/"/>
+    
+  </entry>
   
   <entry>
     <title><![CDATA[Hadoop homework]]></title>
