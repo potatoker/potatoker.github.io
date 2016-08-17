@@ -5,29 +5,17 @@
   
   <title>动态加载任务并行框架 | RRRay</title>
   <meta name="viewport" content="width=device-width">
-  <meta name="description" content="项目已经过去很久了，虽然现在研究方向改变了很多，但是从毕设开始做这个到发现这个和目前流行的一些插件化原理很相似，这里再基于之前做的和之后学到的内容对动态加载做一个总结。
-先介绍本来这个项目的机制:
-
-并行框架采用了AKKA,目前已经实现了AKKA框架在Android平台上的运行了，但遇到了Mthod 64K的问题，使用multidex的方法在Android5.0的平台上得到了解决
-master向集">
+  <meta name="description" content="项目已经过去很久了，虽然现在研究方向改变了很多，但是从毕设开始做这个到发现这个和目前流行的一些插件化原理很相似，这里再基于之前做的和之后学到的内容对动态加载做一个总结。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="动态加载任务并行框架">
-<meta property="og:url" content="http://potatoker.github.io/2016/07/17/动态加载任务的并行框架/index.html">
+<meta property="og:url" content="http://potatoker.github.io/2016/08/17/动态加载任务的并行框架/index.html">
 <meta property="og:site_name" content="RRRay">
-<meta property="og:description" content="项目已经过去很久了，虽然现在研究方向改变了很多，但是从毕设开始做这个到发现这个和目前流行的一些插件化原理很相似，这里再基于之前做的和之后学到的内容对动态加载做一个总结。
-先介绍本来这个项目的机制:
-
-并行框架采用了AKKA,目前已经实现了AKKA框架在Android平台上的运行了，但遇到了Mthod 64K的问题，使用multidex的方法在Android5.0的平台上得到了解决
-master向集">
+<meta property="og:description" content="项目已经过去很久了，虽然现在研究方向改变了很多，但是从毕设开始做这个到发现这个和目前流行的一些插件化原理很相似，这里再基于之前做的和之后学到的内容对动态加载做一个总结。">
 <meta property="og:image" content="http://potatoker.github.io/images/14691068206589.png">
-<meta property="og:updated_time" content="2016-08-17T07:16:48.702Z">
+<meta property="og:updated_time" content="2016-08-17T07:19:05.740Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="动态加载任务并行框架">
-<meta name="twitter:description" content="项目已经过去很久了，虽然现在研究方向改变了很多，但是从毕设开始做这个到发现这个和目前流行的一些插件化原理很相似，这里再基于之前做的和之后学到的内容对动态加载做一个总结。
-先介绍本来这个项目的机制:
-
-并行框架采用了AKKA,目前已经实现了AKKA框架在Android平台上的运行了，但遇到了Mthod 64K的问题，使用multidex的方法在Android5.0的平台上得到了解决
-master向集">
+<meta name="twitter:description" content="项目已经过去很久了，虽然现在研究方向改变了很多，但是从毕设开始做这个到发现这个和目前流行的一些插件化原理很相似，这里再基于之前做的和之后学到的内容对动态加载做一个总结。">
   
     <link rel="alternative" href="/atom.xml" title="RRRay" type="application/atom+xml">
   
@@ -62,14 +50,14 @@ master向集">
       <article id="post-动态加载任务的并行框架" class="post">
 	<footer class="entry-meta-header">
 		<span class="meta-elements date">
-			<a href="/2016/07/17/动态加载任务的并行框架/" class="article-date">
-  <time datetime="2016-07-17T12:10:01.000Z" itemprop="datePublished">2016-07-17</time>
+			<a href="/2016/08/17/动态加载任务的并行框架/" class="article-date">
+  <time datetime="2016-08-17T07:10:01.000Z" itemprop="datePublished">2016-08-17</time>
 </a>
 		</span>
 		<span class="meta-elements author">RRRay</span>
 		<div class="commentscount">
 			
-				<a href="http://potatoker.github.io/2016/07/17/动态加载任务的并行框架/#disqus_thread" class="article-comment-link">Comments</a>
+				<a href="http://potatoker.github.io/2016/08/17/动态加载任务的并行框架/#disqus_thread" class="article-comment-link">Comments</a>
 			
 		</div>
 	</footer>
@@ -86,6 +74,7 @@ master向集">
 	<div class="entry-content">
 		
     	<p>项目已经过去很久了，虽然现在研究方向改变了很多，但是从毕设开始做这个到发现这个和目前流行的一些插件化原理很相似，这里再基于之前做的和之后学到的内容对动态加载做一个总结。</p>
+<a id="more"></a>
 <p>先介绍本来这个项目的机制:</p>
 <ol>
 <li>并行框架采用了AKKA,目前已经实现了AKKA框架在Android平台上的运行了，但遇到了Mthod 64K的问题，使用multidex的方法在Android5.0的平台上得到了解决</li>
@@ -333,21 +322,12 @@ Object1 object_reload = myObjectClass2.newInstance()
     
 <nav id="article-nav">
   
-    <a href="/2016/08/16/OOM/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          图片OOM
-        
-      </div>
-    </a>
   
-  
-    <a href="/2016/05/17/单例/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2016/08/17/回溯法/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
       <div class="article-nav-title">
         
-          单例
+          回溯法
         
       </div>
     </a>
@@ -387,7 +367,7 @@ Object1 object_reload = myObjectClass2.newInstance()
 <script>
   var disqus_shortname = 'RRRaysblog';
   
-  var disqus_url = 'http://potatoker.github.io/2016/07/17/动态加载任务的并行框架/';
+  var disqus_url = 'http://potatoker.github.io/2016/08/17/动态加载任务的并行框架/';
   
   (function(){
     var dsq = document.createElement('script');
