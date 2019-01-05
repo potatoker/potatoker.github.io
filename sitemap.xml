@@ -2,63 +2,68 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://potatoker.github.io/2019/01/06/Flag/</loc>
+    <lastmod>2019-01-05T10:18:18.059Z</lastmod>
+  </url>
+  
+  <url>
     <loc>http://potatoker.github.io/2016/08/17/%E5%8A%A8%E6%80%81%E5%8A%A0%E8%BD%BD%E4%BB%BB%E5%8A%A1%E7%9A%84%E5%B9%B6%E8%A1%8C%E6%A1%86%E6%9E%B6/</loc>
-    <lastmod>2016-08-17T07:19:05.740Z</lastmod>
+    <lastmod>2016-08-17T07:19:06.000Z</lastmod>
   </url>
   
   <url>
     <loc>http://potatoker.github.io/2016/08/17/%E5%9B%9E%E6%BA%AF%E6%B3%95/</loc>
-    <lastmod>2016-08-17T04:35:05.038Z</lastmod>
+    <lastmod>2016-08-17T04:35:06.000Z</lastmod>
   </url>
   
   <url>
     <loc>http://potatoker.github.io/2015/12/23/scala-on-android/</loc>
-    <lastmod>2016-08-17T04:30:12.323Z</lastmod>
+    <lastmod>2016-08-17T04:30:14.000Z</lastmod>
   </url>
   
   <url>
     <loc>http://potatoker.github.io/2016/08/17/Binder/</loc>
-    <lastmod>2016-08-17T04:10:39.355Z</lastmod>
+    <lastmod>2016-08-17T04:10:40.000Z</lastmod>
   </url>
   
   <url>
     <loc>http://potatoker.github.io/2016/08/16/OOM/</loc>
-    <lastmod>2016-08-17T03:55:00.252Z</lastmod>
+    <lastmod>2016-08-17T03:55:02.000Z</lastmod>
   </url>
   
   <url>
     <loc>http://potatoker.github.io/2016/05/17/%E5%8D%95%E4%BE%8B/</loc>
-    <lastmod>2016-08-17T03:42:56.130Z</lastmod>
+    <lastmod>2016-08-17T03:42:58.000Z</lastmod>
   </url>
   
   <url>
     <loc>http://potatoker.github.io/2015/12/20/json%E4%BD%BF%E7%94%A8%E6%80%BB%E7%BB%93/</loc>
-    <lastmod>2016-01-30T12:38:11.039Z</lastmod>
+    <lastmod>2016-01-30T12:38:12.000Z</lastmod>
   </url>
   
   <url>
     <loc>http://potatoker.github.io/2016/01/09/hadoop%E6%B5%81%E6%B0%B4%E8%B4%A6/</loc>
-    <lastmod>2016-01-09T13:13:17.236Z</lastmod>
+    <lastmod>2016-01-09T13:13:18.000Z</lastmod>
   </url>
   
   <url>
     <loc>http://potatoker.github.io/2015/12/24/akka-on-android/</loc>
-    <lastmod>2015-12-24T22:27:49.802Z</lastmod>
+    <lastmod>2015-12-24T22:27:50.000Z</lastmod>
   </url>
   
   <url>
     <loc>http://potatoker.github.io/2015/12/23/cat/</loc>
-    <lastmod>2015-12-23T06:33:28.503Z</lastmod>
+    <lastmod>2015-12-23T06:33:30.000Z</lastmod>
   </url>
   
   <url>
     <loc>http://potatoker.github.io/2015/12/20/learn-pyspider/</loc>
-    <lastmod>2015-12-22T05:55:22.499Z</lastmod>
+    <lastmod>2015-12-22T05:55:24.000Z</lastmod>
   </url>
   
   <url>
     <loc>http://potatoker.github.io/2015/12/13/are-you-ok/</loc>
-    <lastmod>2015-12-13T08:27:21.993Z</lastmod>
+    <lastmod>2015-12-13T08:27:22.000Z</lastmod>
   </url>
   
 </urlset>
